@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>THE LAST SENTINEL: GAME LIBRARY</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Orbitron:wght@400;700;900&family=Cairo:wght@400;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+        
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            font-family: 'Tajawal', sans-serif;
+            overflow: hidden;
+            color: #fff;
+        }
+        
+        /* ===== نظام القصة السينمائي ===== */
+        #comic-stage {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            z-index: 10000;
+            display: none;
+            cursor: pointer;
+        }
+        
+        #comic-frame {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 1s ease-out, opacity 0.8s ease-in-out;
+            opacity: 0;
+            background-color: #0a0a1a;
+        }
+        
+        .active-frame {
+            opacity: 1 !important;
+            transform: scale(1.02);
+        }
+        
+        #subtitles {
+            position: absolute;
+            bottom: 15%;
+            width: 100%;
+            text-align: center;
+            color: #ffd700;
+            font-family: 'Cairo', 'Courier New', monospace;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 3px 3px 0 #000, 0 0 20px #ffd700;
+            padding: 20px 40px;
+            z-index: 10001;
+            background: linear-gradient(90deg, transparent, rgba(0,0,0,0.8), transparent);
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+        
+        #click-info {
+            position: absolute;
+            bottom: 5%;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 215, 0, 0.7);
+            font-size: 18px;
+            letter-spacing: 4px;
+            z-index: 10001;
+            animation: pulse 1.5s infinite;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* تأثير اهتزاز الشاشة */
+        .shake {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        /* شاشة البداية */
+        #start-screen {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a2e, #0a0a0a);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+        
+        .start-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 40px;
+        }
+        
+        .game-title {
+            font-size: 72px;
+            font-weight: 900;
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ff6b00, 0 0 60px #ff0000;
+            margin-bottom: 20px;
+            animation: titlePulse 2s infinite;
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .game-subtitle {
+            font-size: 24px;
+            color: #0ff;
+            margin-bottom: 50px;
+            letter-spacing: 5px;
+        }
+        
+        .play-btn {
+            background: linear-gradient(45deg, #ffd700, #ff6b00);
+            border: none;
+            color: #000;
+            font-size: 32px;
+            font-weight: bold;
+            padding: 20px 60px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px #ffd700;
+            margin-bottom: 30px;
+        }
+        
+        .play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 50px #ffd700;
+        }
+        
+        .controls-preview {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #0ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        /* حاوية اللعبة */
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+        }
+        
+        /* الشريط العلوي */
+        #top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            z-index: 100;
+        }
+        
+        .health-container {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 15px;
+            min-width: 300px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .health-bar {
+            width: 100%;
+            height: 25px;
+            background: #333;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .health-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffd700);
+            transition: width 0.3s;
+            border-radius: 12px;
+        }
+        
+        .energy-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #0ff, #f0f);
+            border-radius: 5px;
+            margin-top: 5px;
+            transition: width 0.2s;
+        }
+        
+        .score-container {
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #0ff;
+            border-radius: 15px;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .score {
+            font-size: 32px;
+            color: #0ff;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .high-score {
+            font-size: 18px;
+            color: #ffd700;
+            text-align: center;
+        }
+        
+        /* شريط المستوى والخبرة */
+        #level-container {
+            position: absolute;
+            bottom: 120px;
+            left: 20px;
+            width: 300px;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+        
+        .level-text {
+            color: #ffd700;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .xp-bar {
+            width: 100%;
+            height: 10px;
+            background: #333;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .xp-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffd700, #ff6b00);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        /* أزرار التحكم للموبايل */
+        #mobile-controls {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1000;
+            padding: 0 20px;
+        }
+        
+        .mobile-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 3px solid #ffd700;
+            border-radius: 50%;
+            color: #ffd700;
+            font-size: 30px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: all 0.2s;
+        }
+        
+        .mobile-btn:active {
+            transform: scale(0.9);
+            background: #ffd700;
+            color: #000;
+        }
+        
+        .mobile-btn.special {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: #ff0000;
+            color: #ff0000;
+        }
+        
+        @media (pointer: coarse) {
+            #mobile-controls {
+                display: flex;
+            }
+        }
+        
+        /* زر القائمة */
+        #menu-button {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #ffd700;
+            border: none;
+            color: #000;
+            font-size: 30px;
+            cursor: pointer;
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px #ffd700;
+        }
+        
+        #menu-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #0a0a0a);
+            border-left: 3px solid #ffd700;
+            padding: 30px;
+            z-index: 1000;
+            transition: right 0.3s;
+            box-shadow: -10px 0 50px rgba(255,215,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+        
+        #menu-panel.open {
+            right: 0;
+        }
+        
+        .menu-header {
+            font-size: 32px;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ffd700;
+        }
+        
+        .menu-item {
+            background: rgba(255,215,0,0.1);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .menu-item:hover {
+            background: #ffd700;
+            color: #000;
+            transform: scale(1.05);
+        }
+        
+        .menu-item span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        #pause-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .pause-content {
+            text-align: center;
+        }
+        
+        .pause-title {
+            font-size: 80px;
+            color: #ffd700;
+            text-shadow: 0 0 30px #ffd700;
+            margin-bottom: 50px;
+        }
+        
+        .pause-btn {
+            background: linear-gradient(45deg, #ffd700, #ff6b00);
+            border: none;
+            color: #000;
+            font-size: 28px;
+            font-weight: bold;
+            padding: 20px 50px;
+            margin: 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 300px;
+        }
+        
+        .pause-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #ffd700;
+        }
+        
+        /* نظام الإشعارات */
+        #notification-area {
+            position: fixed;
+            top: 120px;
+            right: 20px;
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        
+        .notification {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            padding: 15px 25px;
+            color: #ff0000;
+            font-family: 'Orbitron', monospace;
+            font-size: 18px;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            background: #0a0a0a;
+        }
+    </style>
+</head>
+<body>
+    <!-- نظام القصة السينمائي -->
+    <div id="comic-stage">
+        <div id="comic-frame"></div>
+        <div id="subtitles"></div>
+        <div id="click-info">انقر على الشاشة للمتابعة...</div>
+    </div>
+    
+    <!-- شاشة البداية -->
+    <div id="start-screen">
+        <div class="start-content">
+            <h1 class="game-title">The Last Save</h1>
+            <div class="game-subtitle">GAME ZONE EDITION</div>
+            
+            <button class="play-btn" onclick="startStory()">▶ بدء القصة</button>
+            
+            <div class="controls-preview">
+                <h2 style="color: #ffd700; margin-bottom: 20px;">طريقة اللعب</h2>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                    <div>
+                        <div style="font-size: 40px;">⬆️</div>
+                        <div>قفز</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 40px;">⬇️</div>
+                        <div>انبطاح</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 40px;">⬅️➡️</div>
+                        <div>حركة</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 40px;">␣</div>
+                        <div>صد (5 حروف)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- حاوية اللعبة -->
+    <div id="game-container">
+        <!-- منطقة الإشعارات -->
+        <div id="notification-area"></div>
+        
+        <!-- الشريط العلوي -->
+        <div id="top-bar">
+            <div class="health-container">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>⚡ الوعي</span>
+                    <span id="health-text">100%</span>
+                </div>
+                <div class="health-bar">
+                    <div id="health-fill" class="health-fill"></div>
+                </div>
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>🔋 الطاقة</span>
+                        <span id="energy-text">100%</span>
+                    </div>
+                    <div id="energy-fill" class="energy-bar" style="width: 100%;"></div>
+                </div>
+            </div>
+            
+            <div class="score-container">
+                <div class="score" id="score">0000</div>
+                <div class="high-score">🏆 أفضل: <span id="high-score">0000</span></div>
+            </div>
+        </div>
+        
+        <!-- شريط المستوى والخبرة -->
+        <div id="level-container">
+            <div class="level-text">
+                <span>المستوى <span id="level">1</span></span>
+                <span id="xp-text">0/100</span>
+            </div>
+            <div class="xp-bar">
+                <div id="xp-fill" class="xp-fill"></div>
+            </div>
+        </div>
+        
+        <!-- زر القائمة -->
+        <button id="menu-button" onclick="toggleMenu()">☰</button>
+        
+        <!-- لوحة القائمة -->
+        <div id="menu-panel">
+            <div class="menu-header">التحكم والإعدادات</div>
+            
+            <div class="menu-item" onclick="togglePause()">
+                <span>⏸️</span>
+                <span>إيقاف مؤقت</span>
+            </div>
+            
+            <div class="menu-item" onclick="resetGame()">
+                <span>🔄</span>
+                <span>بداية جديدة</span>
+            </div>
+            
+            <div class="menu-item" onclick="location.reload()">
+                <span>🏠</span>
+                <span>القائمة الرئيسية</span>
+            </div>
+            
+            <div style="margin-top: 50px; text-align: center; color: #ffd700;">
+                <p>الإصدار 12.0 - FINAL</p>
+                <p>صنع في مصر 🇪🇬</p>
+            </div>
+        </div>
+        
+        <!-- شاشة الإيقاف المؤقت -->
+        <div id="pause-screen">
+            <div class="pause-content">
+                <h1 class="pause-title">إيقاف مؤقت</h1>
+                <button class="pause-btn" onclick="resumeGame()">استمرار</button>
+                <button class="pause-btn" onclick="resetGame()">بداية جديدة</button>
+                <button class="pause-btn" onclick="location.reload()">خروج</button>
+            </div>
+        </div>
+        
+        <!-- أزرار التحكم للموبايل -->
+        <div id="mobile-controls">
+            <div class="mobile-btn" id="left-btn">←</div>
+            <div class="mobile-btn" id="jump-btn">↑</div>
+            <div class="mobile-btn" id="right-btn">→</div>
+            <div class="mobile-btn special" id="space-btn">␣</div>
+        </div>
+        
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <script>
+        // ========== إضافة دالة roundRect للرسم ==========
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            return this;
+        };
+
+        // ========== بيانات القصة مع الروابط والنصوص الجديدة ==========
+        const chapter1Comic = [
+            { 
+                img: "https://i.ibb.co/S4vHSHP4/image.webp", 
+                text: "في تلك اللحظة.. لم يكن العالم هو ما يهمني، بل عالمي الخاص الذي بنيته لسنوات داخل مكتبة ألعابي." 
+            },
+            { 
+                img: "https://i.ibb.co/5CQF4Nh/image.webp", 
+                text: "كان عليّ التحرك بسرعة.. ربطت وعيِي بالنواة الرقمية في محاولة يائسة لتجميد بيانات ألعابي قبل فوات الأوان." 
+            },
+            { 
+                img: "https://i.ibb.co/KpnRLz0f/image.png", 
+                text: "النبضة الكهرومغناطيسية بدأت تلتهم كل شيء.. تاريخي الرقمي بدأ يتلاشى، وصار لزاماً عليّ حماية كل بايت متبقٍ." 
+            },
+            { 
+                img: "https://i.ibb.co/KjKck4YH/image.jpg", 
+                text: "تحول جسدي إلى بيانات نقية داخل النظام.. لن أسمح لهذا الانهيار بحذف ذكرياتي بهذه السهولة." 
+            },
+            { 
+                img: "https://i.ibb.co/cSmgd6L9/image.png", 
+                text: "سأكون الحارس الأخير.. سأستخدم درعي وسيفي لصد الهجمات، فكل ضربة أتلقاها تعني ضياع لعبة للأبد!" 
+            },
+            { 
+                img: "https://i.ibb.co/Tx5cqRhg/image.png", 
+                text: "النظام يرسل تحذيرات حرجة.. الأخطاء بدأت تظهر على جسدي، والمكتبة في خطر حقيقي. المواجهة تبدأ الآن!" 
+            }
+        ];
+
+        let currentFrame = 0;
+        let isStoryPlaying = false;
+
+        // ========== نظام القصة ==========
+        function startStory() {
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+                startChapter1();
+            }, 500);
+        }
+
+        function startChapter1() {
+            isStoryPlaying = true;
+            currentFrame = 0;
+            const stage = document.getElementById('comic-stage');
+            stage.style.display = 'block';
+            stage.style.opacity = 1;
+            
+            console.log("🎵 تشغيل موسيقى القصة...");
+            
+            renderFrame();
+
+            stage.onclick = () => {
+                if (!isStoryPlaying) return;
+                
+                currentFrame++;
+                if (currentFrame < chapter1Comic.length) {
+                    renderFrame();
+                } else {
+                    exitStory();
+                }
+            };
+        }
+
+        function renderFrame() {
+            const frame = document.getElementById('comic-frame');
+            const subs = document.getElementById('subtitles');
+            
+            frame.style.opacity = 0;
+            setTimeout(() => {
+                frame.style.backgroundImage = `url('${chapter1Comic[currentFrame].img}')`;
+                frame.classList.add('active-frame');
+                typeEffect(chapter1Comic[currentFrame].text, subs);
+            }, 500);
+        }
+
+        function typeEffect(text, element) {
+            element.innerHTML = "";
+            let i = 0;
+            let timer = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text[i];
+                    i++;
+                } else {
+                    clearInterval(timer);
+                }
+            }, 40);
+        }
+
+        function exitStory() {
+            const stage = document.getElementById('comic-stage');
+            stage.style.opacity = 0;
+            setTimeout(() => {
+                stage.style.display = 'none';
+                isStoryPlaying = false;
+                document.getElementById('game-container').style.display = 'block';
+                initGame();
+            }, 1000);
+        }
+
+        // ========== مكتبة الألعاب (5 ألعاب) ==========
+        const gameLibrary = ["🎮 ELDEN RING", "🎮 RED DEAD 2", "🎮 THE WITCHER 3", "🎮 MINECRAFT", "🎮 GTA V"];
+        let lostCount = 0;
+        let lastThreshold = 100;
+
+        // ========== متغيرات التحكم ==========
+        let gamePaused = false;
+        let gameRunning = false;
+        let player, hazards, powerups, particles;
+        let keys = {};
+        let score = 0;
+        let highScore = localStorage.getItem('sentinelHighScore') || 0;
+        let frame = 0;
+        let animationFrame;
+        
+        // ========== متغيرات نظام المستوى والخبرة ==========
+        let level = 1;
+        let xp = 0;
+        let xpToNextLevel = 100;
+        
+        // ========== متغيرات نظام QTE ==========
+        let isSlowMo = false;
+        let qteActive = false;
+        let qteSequence = "";
+        let qteIndex = 0;
+        let currentHazard = null;
+        
+        // ========== إعدادات الكانفاس ==========
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // ========== نظام الإشعارات ==========
+        function showNotification(message, isError = false) {
+            const notificationArea = document.getElementById('notification-area');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.borderColor = isError ? '#ff0000' : '#ffd700';
+            notification.style.color = isError ? '#ff0000' : '#ffd700';
+            notification.textContent = message;
+            notificationArea.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 2500);
+        }
+        
+        // ========== دوال التحكم باللعبة ==========
+        function initGame() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            player = {
+                x: 150, 
+                y: canvas.height - 150,
+                ground: canvas.height - 150,
+                w: 50, 
+                h: 80,
+                velX: 0, 
+                velY: 0,
+                state: 'IDLE',
+                health: 100,
+                maxHealth: 100,
+                energy: 100,
+                maxEnergy: 100,
+                canDash: true,
+                dashCooldown: 0,
+                isJumping: false
+            };
+            
+            hazards = [];
+            powerups = [];
+            particles = [];
+            score = 0;
+            level = 1;
+            xp = 0;
+            xpToNextLevel = 100;
+            frame = 0;
+            gameRunning = true;
+            gamePaused = false;
+            isSlowMo = false;
+            qteActive = false;
+            lostCount = 0;
+            lastThreshold = 100;
+            
+            updateUI();
+            
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            gameLoop();
+        }
+        
+        function togglePause() {
+            gamePaused = !gamePaused;
+            document.getElementById('pause-screen').style.display = gamePaused ? 'flex' : 'none';
+        }
+        
+        function resumeGame() {
+            gamePaused = false;
+            document.getElementById('pause-screen').style.display = 'none';
+        }
+        
+        function toggleMenu() {
+            document.getElementById('menu-panel').classList.toggle('open');
+        }
+        
+        function resetGame() {
+            gamePaused = false;
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('menu-panel').classList.remove('open');
+            initGame();
+        }
+        
+        function triggerEffect(effect) {
+            canvas.style.filter = effect;
+            setTimeout(() => canvas.style.filter = 'none', 100);
+        }
+        
+        // ========== نظام فقدان الألعاب ==========
+        function triggerGameLossEffect(gameName) {
+            // إشعار درامي على الشاشة
+            const notice = document.createElement('div');
+            notice.style.cssText = `
+                position: fixed; 
+                top: 50%; 
+                left: 50%; 
+                transform: translate(-50%, -50%);
+                color: #ff0000; 
+                font-family: 'Orbitron', monospace; 
+                font-size: 32px;
+                font-weight: bold;
+                text-shadow: 0 0 20px red; 
+                z-index: 10000; 
+                text-align: center;
+                background: rgba(0,0,0,0.8);
+                padding: 30px;
+                border: 3px solid #ff0000;
+                border-radius: 20px;
+                animation: shake 0.5s;
+            `;
+            notice.innerHTML = `⚠️ CRITICAL ERROR ⚠️<br><br>DATA CORRUPTED:<br><span style="color: #ffd700">${gameName}</span><br><br>DELETED FROM LIBRARY`;
+            document.body.appendChild(notice);
+
+            // وميض أحمر سريع على الكانفاس
+            ctx.fillStyle = "rgba(255, 0, 0, 0.4)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            setTimeout(() => notice.remove(), 3000);
+            
+            showNotification(`❌ ${gameName} DELETED!`, true);
+        }
+        
+        function checkHealthThreshold() {
+            if (player.health <= lastThreshold - 20) {
+                if (lostCount < gameLibrary.length) {
+                    let gameName = gameLibrary[lostCount];
+                    triggerGameLossEffect(gameName);
+                    lostCount++;
+                    lastThreshold -= 20;
+                }
+            }
+        }
+        
+        // ========== نظام الخبرة والمستوى ==========
+        function gainXP(amount) {
+            xp += amount;
+            while (xp >= xpToNextLevel) {
+                levelUp();
+            }
+            updateUI();
+        }
+        
+        function levelUp() {
+            level++;
+            xp -= xpToNextLevel;
+            xpToNextLevel = Math.floor(xpToNextLevel * 1.5);
+            showNotification(`✨ ترقية! المستوى ${level}`);
+        }
+        
+        function updateUI() {
+            document.getElementById('health-fill').style.width = (player.health / player.maxHealth * 100) + '%';
+            document.getElementById('health-text').innerText = Math.floor(player.health) + '%';
+            document.getElementById('energy-fill').style.width = (player.energy / player.maxEnergy * 100) + '%';
+            document.getElementById('energy-text').innerText = Math.floor(player.energy) + '%';
+            document.getElementById('score').innerText = String(score).padStart(4, '0');
+            document.getElementById('high-score').innerText = String(highScore).padStart(4, '0');
+            document.getElementById('level').innerText = level;
+            document.getElementById('xp-fill').style.width = (xp / xpToNextLevel * 100) + '%';
+            document.getElementById('xp-text').innerText = `${xp}/${xpToNextLevel}`;
+        }
+        
+        // ========== نظام اهتزاز الشاشة ==========
+        function shakeScreen() {
+            canvas.classList.add('shake');
+            setTimeout(() => canvas.classList.remove('shake'), 300);
+        }
+        
+        // ========== نظام الصد الديناميكي ==========
+        function startQTE(hazard) {
+            isSlowMo = true;
+            qteActive = true;
+            currentHazard = hazard;
+            
+            hazard.x += 100;
+            
+            const keysPool = "ASDFG";
+            qteSequence = "";
+            for(let i = 0; i < 5; i++) {
+                qteSequence += keysPool.charAt(Math.floor(Math.random() * keysPool.length));
+            }
+            qteIndex = 0;
+        }
+        
+        function successParry() {
+            isSlowMo = false;
+            qteActive = false;
+            
+            if (currentHazard) {
+                const index = hazards.indexOf(currentHazard);
+                if (index > -1) {
+                    hazards.splice(index, 1);
+                }
+            }
+            
+            level += 0.5;
+            score += 50;
+            gainXP(20);
+            
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: currentHazard.x,
+                    y: currentHazard.y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10 - 5,
+                    life: 1,
+                    color: '#ffd700',
+                    size: Math.random() * 5 + 2
+                });
+            }
+            
+            currentHazard = null;
+            updateUI();
+        }
+        
+        function failedParry() {
+            isSlowMo = false;
+            qteActive = false;
+            
+            player.health -= 20;
+            shakeScreen();
+            
+            // فحص فقدان اللعبة
+            checkHealthThreshold();
+            
+            currentHazard = null;
+            updateUI();
+        }
+        
+        // ========== نظام الجسيمات ==========
+        function createExplosion(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                particles.push({
+                    x, y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 1,
+                    color: color,
+                    size: Math.random() * 4 + 1
+                });
+            }
+        }
+        
+        // ========== دالة رسم مجسم الظل ==========
+        function drawShadowFigure(x, y, w, h) {
+            ctx.save();
+            
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'rgba(0,0,0,0.5)';
+            ctx.fillStyle = 'rgba(0,0,0,0.2)';
+            ctx.beginPath();
+            ctx.ellipse(x + w/2, y + h + 5, 25, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = player.state.includes('SHIELD') ? '#00f2ff' : '#ffd700';
+            ctx.fillStyle = "black";
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 4;
+            ctx.lineCap = "round";
+            
+            ctx.beginPath();
+            ctx.arc(x + w/2, y - 8, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y);
+            ctx.lineTo(x + w/2, y + h/2);
+            ctx.stroke();
+            
+            let time = Date.now() / 200;
+            let armSwing = Math.sin(time) * (player.velX !== 0 ? 15 : 5);
+            let legMove = Math.sin(time * 1.5) * (player.velX !== 0 ? 20 : 8);
+            
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y + 15);
+            ctx.lineTo(x + w/2 + 25 + armSwing, y + 35);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y + 15);
+            ctx.lineTo(x + w/2 - 25 - armSwing, y + 35);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y + h/2);
+            ctx.lineTo(x + w/2 + 15 + legMove, y + h - 5);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, y + h/2);
+            ctx.lineTo(x + w/2 - 15 - legMove, y + h - 5);
+            ctx.stroke();
+            
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#ffd700";
+            ctx.fillStyle = "#ffd700";
+            ctx.beginPath();
+            ctx.arc(x + w/2, y + 20, 6 + Math.sin(time * 3) * 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        // ========== دالة رسم حالة المكتبة ==========
+        function drawLibraryHUD() {
+            ctx.save();
+            
+            // خلفية شبه شفافة
+            ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 2;
+            ctx.fillRect(20, 80, 250, 140);
+            ctx.strokeRect(20, 80, 250, 140);
+            
+            // عنوان
+            ctx.fillStyle = "#ffd700";
+            ctx.font = "bold 16px Orbitron";
+            ctx.fillText("📦 GAME LIBRARY:", 30, 105);
+            
+            // رسم الألعاب
+            gameLibrary.forEach((game, i) => {
+                let yPos = 130 + (i * 20);
+                if (i < lostCount) {
+                    // ألعاب محذوفة - لون رمادي وخط شطب
+                    ctx.fillStyle = "#555";
+                    ctx.font = "14px Cairo";
+                    ctx.fillText("❌ " + game, 35, yPos);
+                    
+                    // رسم خط شطب
+                    ctx.beginPath();
+                    ctx.strokeStyle = "#ff0000";
+                    ctx.lineWidth = 2;
+                    ctx.moveTo(35, yPos - 5);
+                    ctx.lineTo(200, yPos - 5);
+                    ctx.stroke();
+                } else {
+                    // ألعاب محمية - لون أخضر
+                    ctx.fillStyle = "#00ff00";
+                    ctx.font = "14px Cairo";
+                    ctx.fillText("✅ " + game, 35, yPos);
+                }
+            });
+            
+            ctx.restore();
+        }
+        
+        // ========== نظام التحكم ==========
+        function updateMovement() {
+            if (qteActive) return;
+            
+            if (keys['ArrowRight']) player.velX = 7;
+            else if (keys['ArrowLeft']) player.velX = -7;
+            else player.velX *= 0.8;
+            
+            if (keys['ArrowUp'] && !player.isJumping) {
+                player.velY = -15;
+                player.isJumping = true;
+                createExplosion(player.x + player.w/2, player.y + player.h, '#ffffff');
+            }
+            
+            if (keys['ArrowDown']) player.h = 40;
+            else player.h = 80;
+            
+            if (keys['KeyZ']) player.state = 'SHIELD_LIGHTNING';
+            else if (keys['KeyX']) player.state = 'SHIELD_EMP';
+            else player.state = 'IDLE';
+            
+            player.y += player.velY;
+            if (player.y < player.ground) player.velY += 0.8;
+            else {
+                player.y = player.ground;
+                player.isJumping = false;
+                player.velY = 0;
+            }
+            
+            player.x = Math.max(0, Math.min(canvas.width - player.w, player.x + player.velX));
+        }
+        
+        // ========== نظام القتال ==========
+        function handleCombat() {
+            let timeFactor = isSlowMo ? 0.05 : 1;
+            
+            hazards.forEach((h) => {
+                h.x -= h.speed * timeFactor;
+                
+                if (!qteActive && keys['Space'] && h.x - player.x < 100 && h.x > player.x && h.x - player.x > 20) {
+                    startQTE(h);
+                }
+            });
+        }
+        
+        // ========== دالة الرسم ==========
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#0a0a1a');
+            gradient.addColorStop(1, '#1a1a2e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = '#ffd700';
+            ctx.lineWidth = 1;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffd700';
+            ctx.beginPath();
+            for(let i = 0; i < canvas.width; i += 50) {
+                ctx.moveTo(i - (score % 50), canvas.height - 100);
+                ctx.lineTo(i - (score % 50), canvas.height);
+            }
+            ctx.stroke();
+            
+            hazards.forEach(h => {
+                ctx.save();
+                
+                if(h.type === 'LIGHTNING') {
+                    ctx.strokeStyle = '#00f2ff';
+                    ctx.lineWidth = 4;
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = '#00f2ff';
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(h.x, h.y);
+                    
+                    for(let i = 0; i < 8; i++) {
+                        let xOffset = (i % 2 === 0) ? 15 : -15;
+                        ctx.lineTo(h.x + xOffset, h.y + (i + 1) * (h.h/8));
+                    }
+                    ctx.stroke();
+                } else {
+                    ctx.strokeStyle = '#ff00ff';
+                    ctx.lineWidth = 3;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = '#ff00ff';
+                    
+                    for(let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(h.x + h.w/2, h.y + h.h/2, h.w/2 + i * 10, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+                
+                ctx.restore();
+            });
+            
+            drawShadowFigure(player.x, player.y, player.w, player.h);
+            drawLibraryHUD();
+            
+            if (qteActive) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.font = 'bold 60px Orbitron';
+                ctx.fillStyle = '#ffd700';
+                ctx.textAlign = 'center';
+                
+                let display = qteSequence.split('').map((char, i) => {
+                    if (i < qteIndex) return '✓';
+                    if (i === qteIndex) return `[${char}]`;
+                    return char;
+                }).join(' ');
+                
+                ctx.fillText(display, canvas.width/2, canvas.height/2);
+            }
+            
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+            });
+            
+            particles = particles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.01;
+                return p.life > 0;
+            });
+        }
+        
+        // ========== التحديث ==========
+        function update() {
+            if (!gameRunning || gamePaused) return;
+            
+            frame++;
+            
+            if (frame % Math.max(20, 45 - Math.floor(level * 2)) === 0 && !qteActive) {
+                let type = Math.random() < 0.5 ? 'EMP_PULSE' : 'LIGHTNING';
+                hazards.push({
+                    x: canvas.width,
+                    y: type === 'LIGHTNING' ? canvas.height - 350 : canvas.height - 200,
+                    w: type === 'LIGHTNING' ? 30 : 100,
+                    h: type === 'LIGHTNING' ? 250 : 80,
+                    type: type,
+                    speed: 5 + (level * 0.5) + (score / 100)
+                });
+            }
+            
+            updateMovement();
+            handleCombat();
+            
+            hazards.forEach((h, index) => {
+                if (player.x < h.x + h.w && player.x + player.w > h.x &&
+                    player.y < h.y + h.h && player.y + player.h > h.y) {
+                    
+                    let damage = 0;
+                    
+                    if (h.type === 'LIGHTNING') {
+                        if (player.state !== 'SHIELD_LIGHTNING') {
+                            damage = 10;
+                            triggerEffect('hue-rotate(90deg)');
+                        }
+                    }
+                    
+                    if (h.type === 'EMP_PULSE') {
+                        if (player.state !== 'SHIELD_EMP') {
+                            damage = 10;
+                            triggerEffect('invert(1)');
+                        }
+                    }
+                    
+                    if (damage > 0) {
+                        player.health -= damage;
+                        createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff0000');
+                        shakeScreen();
+                        
+                        // فحص فقدان اللعبة عند كل ضرر
+                        checkHealthThreshold();
+                        
+                        hazards.splice(index, 1);
+                    }
+                }
+                
+                if (h.x + h.w < 0) {
+                    hazards.splice(index, 1);
+                    score += 10;
+                    gainXP(2);
+                }
+            });
+            
+            updateUI();
+            
+            if (player.health <= 0) {
+                gameRunning = false;
+                if (score > highScore) {
+                    localStorage.setItem('sentinelHighScore', score);
+                }
+                alert('⚡ SYSTEM FAILURE ⚡\nلقد فقدت جميع ألعابك!\nالنتيجة: ' + score);
+                location.reload();
+            }
+        }
+        
+        // ========== حلقة اللعبة ==========
+        function gameLoop() {
+            update();
+            draw();
+            animationFrame = requestAnimationFrame(gameLoop);
+        }
+        
+        // ========== التحكم بلوحة المفاتيح ==========
+        window.onkeydown = (e) => {
+            if (!gameRunning || gamePaused) return;
+            
+            if (qteActive) {
+                e.preventDefault();
+                let key = e.code.replace('Key', '');
+                if (key === qteSequence[qteIndex]) {
+                    qteIndex++;
+                    if (qteIndex >= qteSequence.length) {
+                        successParry();
+                    }
+                } else {
+                    failedParry();
+                }
+                return;
+            }
+            
+            keys[e.code] = true;
+            
+            if (e.code === 'ArrowUp' && !player.isJumping) {
+                player.velY = -15;
+                player.isJumping = true;
+            }
+            
+            e.preventDefault();
+        };
+        
+        window.onkeyup = (e) => {
+            keys[e.code] = false;
+        };
+        
+        // ========== أزرار الموبايل ==========
+        const mobileMapping = {
+            'left-btn': 'ArrowLeft',
+            'right-btn': 'ArrowRight',
+            'jump-btn': 'ArrowUp',
+            'space-btn': 'Space'
+        };
+        
+        Object.keys(mobileMapping).forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const key = mobileMapping[id];
+                    keys[key] = true;
+                    
+                    if (qteActive && key === 'Space') {
+                        let mappedKey = 'Space';
+                        if (mappedKey === qteSequence[qteIndex]) {
+                            qteIndex++;
+                            if (qteIndex >= qteSequence.length) {
+                                successParry();
+                            }
+                        } else {
+                            failedParry();
+                        }
+                    }
+                });
+                
+                btn.addEventListener('touchend', () => {
+                    keys[mobileMapping[id]] = false;
+                });
+                
+                btn.addEventListener('touchcancel', () => {
+                    keys[mobileMapping[id]] = false;
+                });
+            }
+        });
+        
+        // ========== تغيير حجم النافذة ==========
+        window.onresize = () => {
+            if (gameRunning) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                player.ground = canvas.height - 150;
+                player.y = player.ground;
+            }
+        };
+    </script>
+</body>
+</html>
