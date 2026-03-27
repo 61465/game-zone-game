@@ -242,82 +242,300 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 @keyframes ptrise{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
 
 /* ══════════════════════════════
-   ENDING
+   CINEMATIC ENDING SCENE
 ══════════════════════════════ */
-#s-end{background:var(--bg);flex-direction:column;overflow-y:auto;justify-content:flex-start;padding:60px 20px 80px;}
-.end-wrap{max-width:860px;width:100%;margin:0 auto;}
+#s-end{background:#000;flex-direction:column;overflow:hidden;justify-content:flex-start;padding:0;}
 
+/* Phase 1: Gallery scroll */
+#end-gallery-phase{
+  width:100%;height:100%;
+  overflow-y:auto;
+  padding:60px 20px 80px;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;
+}
+.end-wrap{max-width:860px;width:100%;margin:0 auto;}
 .end-header{text-align:center;margin-bottom:60px;}
 .end-tag{font-family:var(--mono);font-size:9px;letter-spacing:6px;color:rgba(201,168,76,.35);margin-bottom:16px;direction:ltr;}
 .end-title{font-family:var(--serif);font-size:clamp(24px,4vw,44px);font-weight:900;color:var(--white);line-height:1.3;direction:rtl;letter-spacing:0;}
-
-/* Gallery */
-.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:2px;margin-bottom:70px;}
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:2px;margin-bottom:50px;}
 .gal-item{position:relative;aspect-ratio:16/9;background:var(--void);overflow:hidden;
   opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;}
 .gal-item.show{opacity:1;transform:none;}
-.gal-bg{position:absolute;inset:0;background-size:cover;background-position:center;
-  transition:transform .5s,filter .4s;}
-.gal-item:hover .gal-bg{transform:scale(1.06);filter:brightness(.8) saturate(.7);}
+.gal-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s,filter .4s;}
+.gal-item:hover .gal-bg{transform:scale(1.06);}
 .gal-over{position:absolute;inset:0;background:linear-gradient(to top,rgba(3,3,10,.9) 0%,transparent 55%);}
 .gal-info{position:absolute;bottom:0;left:0;right:0;padding:16px;direction:rtl;text-align:right;}
 .gal-game{font-family:var(--mono);font-size:8px;letter-spacing:3px;color:var(--gold);opacity:.55;margin-bottom:5px;direction:ltr;text-align:left;}
 .gal-moment{font-size:12px;font-weight:600;color:var(--white);line-height:1.5;letter-spacing:0;}
-.gal-item.lost .gal-bg{filter:saturate(0) brightness(.12);}
-.gal-item.lost .gal-info{opacity:.3;}
+.gal-item.lost .gal-bg{filter:saturate(0) brightness(.1);}
+.gal-item.lost .gal-info{opacity:.2;}
 .gal-item.lost::after{content:'محذوف';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:10px;letter-spacing:4px;color:rgba(192,57,43,.35);direction:ltr;}
-
-/* Final scene */
-.final-scene{text-align:center;margin-bottom:60px;}
-.fs-room{
-  width:min(460px,90vw);aspect-ratio:16/9;
-  background:var(--void);margin:0 auto 40px;position:relative;overflow:hidden;
+  font-family:var(--mono);font-size:10px;letter-spacing:4px;color:rgba(192,57,43,.3);direction:ltr;}
+.end-continue-btn{
+  font-family:var(--arabic);font-size:14px;font-weight:600;letter-spacing:0;
+  color:rgba(255,255,255,.35);background:transparent;border:1px solid rgba(255,255,255,.1);
+  padding:14px 45px;cursor:pointer;transition:all .4s;direction:rtl;margin:10px auto 60px;display:block;
+  animation:blink 2s infinite;
 }
-/* monitor */
-.fsr-mon{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);width:44%;text-align:center;}
-.fsr-screen{width:100%;height:0;padding-bottom:62%;
-  background:linear-gradient(135deg,#0a1528,#160a28,#0a1820);
-  border:2px solid rgba(255,255,255,.06);position:relative;overflow:hidden;
-  animation:monflick 5s infinite;}
-@keyframes monflick{0%,100%{opacity:1}94%{opacity:1}95%{opacity:.6}96%{opacity:1}98%{opacity:.85}99%{opacity:1}}
-.fsr-screen::before{content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0,transparent,transparent 3px,rgba(0,0,0,.18) 4px);z-index:2;}
-.fsr-photos{position:absolute;inset:8px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:2px;z-index:1;}
-.fsr-ph{background:var(--void);display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:7px;color:rgba(255,255,255,.1);animation:phglow 3s ease infinite;}
-.fsr-ph:nth-child(1){background:#0d1520;animation-delay:0s;}
-.fsr-ph:nth-child(2){background:#1a100d;animation-delay:.5s;}
-.fsr-ph:nth-child(3){background:#0d1a0d;animation-delay:1s;}
-.fsr-ph:nth-child(4){background:#1a180d;animation-delay:1.5s;}
-.fsr-ph:nth-child(5){background:#0d0d1a;animation-delay:2s;}
-.fsr-ph:nth-child(6){background:#140d1a;animation-delay:2.5s;}
-@keyframes phglow{0%,100%{opacity:.4}50%{opacity:1}}
-.fsr-stand{width:28%;height:16%;background:rgba(255,255,255,.03);margin:0 auto;}
-.fsr-glow{position:absolute;bottom:28%;left:22%;width:56%;height:60%;
-  background:radial-gradient(ellipse at 50% 70%,rgba(15,30,60,.45),transparent 70%);pointer-events:none;}
-/* figure */
-.fsr-fig{position:absolute;bottom:30%;left:50%;transform:translateX(-50%);width:9%;}
-.fsr-head{width:100%;aspect-ratio:1;background:rgba(255,255,255,.06);border-radius:50%;
-  position:relative;animation:headtilt 6s ease-in-out infinite;}
-@keyframes headtilt{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(-6deg) translateY(3px)}}
-.fsr-tear{position:absolute;width:2px;background:linear-gradient(to bottom,transparent,rgba(120,180,255,.55));border-radius:2px;animation:tearfall 2.8s ease-in infinite;opacity:0;}
-.fsr-tear:nth-child(1){height:10px;left:22%;top:58%;animation-delay:1.2s;}
-.fsr-tear:nth-child(2){height:7px;left:64%;top:62%;animation-delay:2.6s;}
-@keyframes tearfall{0%{height:0;opacity:.8;transform:translateY(0)}100%{height:14px;opacity:0;transform:translateY(12px)}}
-.fsr-body{width:130%;height:40px;background:rgba(255,255,255,.04);border-radius:3px 3px 0 0;margin:0 auto;}
-.fsr-floor{position:absolute;bottom:0;left:0;right:0;height:30%;background:linear-gradient(to top,#060610,transparent);}
+.end-continue-btn:hover{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.25);animation:none;}
 
-.fs-caption{font-size:clamp(15px,2.2vw,20px);color:rgba(255,255,255,.45);line-height:2.1;
-  direction:rtl;letter-spacing:0;font-weight:300;max-width:580px;margin:0 auto 12px;}
-.fs-caption strong{color:var(--white);font-weight:600;}
-.fs-quote{font-family:var(--serif);font-size:clamp(16px,2.5vw,26px);color:var(--gold);
-  margin:36px auto;line-height:1.6;direction:rtl;letter-spacing:0;
-  text-shadow:0 0 30px rgba(201,168,76,.25);}
-.fs-restart{font-family:var(--arabic);font-size:13px;font-weight:600;letter-spacing:0;
-  color:rgba(255,255,255,.2);background:transparent;border:1px solid rgba(255,255,255,.1);
-  padding:12px 36px;cursor:pointer;transition:all .3s;direction:rtl;margin-top:10px;}
-.fs-restart:hover{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.25);}
+/* Phase 2: Cinematic dark room */
+#end-cinematic{
+  position:fixed;inset:0;
+  background:#000;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  z-index:800;
+}
+#end-cinematic.on{display:flex;}
+
+/* Letterbox bars */
+#lbox-top{position:absolute;top:0;left:0;right:0;height:12vh;background:#000;z-index:10;}
+#lbox-bot{position:absolute;bottom:0;left:0;right:0;height:12vh;background:#000;z-index:10;}
+
+/* The room */
+#cin-room{
+  position:relative;
+  width:100vw;height:76vh;
+  overflow:hidden;
+  background:radial-gradient(ellipse 60% 60% at 50% 40%, #050508, #000 80%);
+}
+
+/* Dust particles floating */
+.dust{
+  position:absolute;
+  width:1px;height:1px;
+  background:rgba(255,255,255,.4);
+  border-radius:50%;
+  animation:dustfloat linear infinite;
+}
+@keyframes dustfloat{
+  0%{transform:translate(0,0);opacity:0;}
+  10%{opacity:.4;}
+  90%{opacity:.3;}
+  100%{transform:translate(var(--dx),var(--dy));opacity:0;}
+}
+
+/* Monitor glow on floor */
+#cin-floor-glow{
+  position:absolute;
+  bottom:0;left:0;right:0;height:50%;
+  background:radial-gradient(ellipse 80% 100% at 50% 100%,rgba(8,20,50,.6),transparent 70%);
+  pointer-events:none;
+}
+
+/* The figure — detailed silhouette */
+#cin-figure{
+  position:absolute;
+  bottom:18%;
+  left:50%;
+  transform:translateX(-50%);
+  width:clamp(60px,8vw,100px);
+}
+/* Chair */
+.fig-chair{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:130%;
+}
+.fig-chair-seat{
+  width:100%;height:8px;
+  background:rgba(255,255,255,.04);
+  border-radius:2px;
+  margin-bottom:0;
+}
+.fig-chair-back{
+  width:60%;height:30px;
+  background:rgba(255,255,255,.03);
+  border-radius:2px 2px 0 0;
+  margin:0 auto;
+}
+/* Body */
+.fig-body{
+  width:35%;height:38px;
+  background:rgba(255,255,255,.05);
+  border-radius:4px 4px 0 0;
+  margin:0 auto;
+  position:relative;
+}
+/* Head — tilted forward, looking at screen */
+.fig-head{
+  width:55%;aspect-ratio:1;
+  background:rgba(255,255,255,.07);
+  border-radius:50%;
+  margin:0 auto;
+  position:relative;
+  animation:cin-headtilt 8s ease-in-out infinite;
+  transform-origin:bottom center;
+}
+@keyframes cin-headtilt{
+  0%,100%{transform:rotate(-8deg) translateY(2px);}
+  40%{transform:rotate(-12deg) translateY(5px);}
+  70%{transform:rotate(-6deg) translateY(1px);}
+}
+/* Tear drops */
+.cin-tear{
+  position:absolute;
+  width:1.5px;
+  background:linear-gradient(to bottom,rgba(150,200,255,0),rgba(150,200,255,.7));
+  border-radius:2px;
+  opacity:0;
+  animation:cin-tearfall ease-in infinite;
+}
+.cin-tear:nth-child(1){height:0;left:28%;top:65%;animation-duration:3.2s;animation-delay:2s;}
+.cin-tear:nth-child(2){height:0;left:62%;top:68%;animation-duration:4s;animation-delay:4.5s;}
+.cin-tear:nth-child(3){height:0;left:38%;top:70%;animation-duration:2.8s;animation-delay:7s;}
+@keyframes cin-tearfall{
+  0%{height:0;opacity:0;transform:translateY(0);}
+  15%{opacity:.8;}
+  100%{height:18px;opacity:0;transform:translateY(16px);}
+}
+/* Arms on desk */
+.fig-arms{
+  position:absolute;
+  bottom:-2px;left:50%;
+  transform:translateX(-50%);
+  width:160%;height:12px;
+  background:rgba(255,255,255,.04);
+  border-radius:4px;
+}
+
+/* The monitor — the hero of this scene */
+#cin-monitor{
+  position:absolute;
+  bottom:32%;
+  left:50%;
+  transform:translateX(-50%);
+  width:clamp(180px,28vw,340px);
+  text-align:center;
+}
+.cin-screen{
+  width:100%;
+  padding-bottom:62%;
+  position:relative;
+  border:2px solid rgba(255,255,255,.07);
+  border-radius:4px 4px 0 0;
+  overflow:hidden;
+  box-shadow:
+    0 0 60px rgba(10,30,80,.8),
+    0 0 120px rgba(10,20,50,.5),
+    0 0 200px rgba(5,10,30,.3);
+  animation:cin-monflick 6s infinite;
+}
+@keyframes cin-monflick{
+  0%,100%{opacity:1;}93%{opacity:1;}94%{opacity:.5;}95%{opacity:1;}98%{opacity:.8;}99%{opacity:1;}
+}
+.cin-screen::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.15) 4px);
+  z-index:3;pointer-events:none;
+}
+/* Slideshow inside screen */
+#cin-slideshow{
+  position:absolute;inset:0;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:1px;
+  z-index:1;
+}
+.cin-slide{
+  position:relative;overflow:hidden;
+  animation:cin-slidepulse ease-in-out infinite;
+  opacity:.6;
+}
+@keyframes cin-slidepulse{0%,100%{opacity:.5;}50%{opacity:.8;}}
+.cin-slide-label{
+  position:absolute;bottom:2px;left:0;right:0;
+  font-family:var(--mono);font-size:5px;letter-spacing:1px;
+  color:rgba(255,255,255,.3);text-align:center;direction:ltr;z-index:2;
+}
+/* Screen reflection on figure face */
+#cin-face-glow{
+  position:absolute;
+  top:0;bottom:0;left:0;right:0;
+  background:radial-gradient(ellipse 50% 80% at 50% 20%,rgba(10,25,70,.5),transparent 60%);
+  pointer-events:none;z-index:2;
+}
+/* Monitor stand */
+.cin-stand{
+  width:25%;height:8%;
+  background:rgba(255,255,255,.03);
+  margin:0 auto;
+  border-radius:0 0 2px 2px;
+}
+/* Monitor base */
+.cin-base{
+  width:50%;height:4px;
+  background:rgba(255,255,255,.02);
+  margin:0 auto;
+  border-radius:2px;
+}
+/* Monitor glow on desk */
+.cin-desk-glow{
+  position:absolute;
+  bottom:-20px;left:-20%;right:-20%;
+  height:30px;
+  background:radial-gradient(ellipse at 50% 0%,rgba(10,30,90,.4),transparent 70%);
+}
+
+/* Desk */
+#cin-desk{
+  position:absolute;
+  bottom:30%;left:0;right:0;height:3px;
+  background:rgba(255,255,255,.04);
+}
+
+/* Text lines that appear */
+#cin-lines{
+  position:absolute;
+  bottom:8vh;
+  left:50%;transform:translateX(-50%);
+  z-index:20;
+  text-align:center;
+  width:min(600px,85vw);
+}
+.cin-line{
+  font-family:var(--arabic);
+  font-size:clamp(14px,2vw,18px);
+  font-weight:300;
+  color:rgba(255,255,255,0);
+  line-height:2;
+  letter-spacing:0;
+  direction:rtl;
+  transition:color 2s ease;
+  margin-bottom:4px;
+}
+.cin-line.vis{color:rgba(255,255,255,.45);}
+.cin-line.vis strong{color:rgba(255,255,255,.75);font-weight:600;}
+.cin-line-final{
+  font-family:var(--serif);
+  font-size:clamp(15px,2.2vw,20px);
+  color:rgba(201,168,76,0);
+  letter-spacing:0;
+  direction:rtl;
+  transition:color 2.5s ease;
+  margin-top:16px;
+  text-shadow:0 0 30px rgba(201,168,76,0);
+}
+.cin-line-final.vis{
+  color:rgba(201,168,76,.65);
+  text-shadow:0 0 40px rgba(201,168,76,.2);
+}
+
+/* Restart — appears last */
+#cin-restart{
+  position:absolute;bottom:4vh;right:4vw;z-index:20;
+  font-family:var(--arabic);font-size:12px;font-weight:400;letter-spacing:0;
+  color:rgba(255,255,255,.1);background:transparent;border:none;
+  cursor:pointer;transition:color .5s;direction:rtl;
+  opacity:0;
+}
+#cin-restart.vis{opacity:1;}
+#cin-restart:hover{color:rgba(255,255,255,.35);}
+
 /* RELEASE DRAMATIC OVERLAY */
 #release-overlay{
   position:fixed;inset:0;z-index:600;pointer-events:none;
@@ -472,122 +690,135 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 
 <!-- ══ ENDING ══ -->
 <div class="screen" id="s-end">
-  <div class="end-wrap">
-    <div class="end-header">
-      <div class="end-tag">WHAT REMAINS · ما تبقّى</div>
-      <h2 class="end-title" id="end-title"></h2>
+
+  <!-- Phase 1: Gallery -->
+  <div id="end-gallery-phase">
+    <div class="end-wrap">
+      <div class="end-header">
+        <div class="end-tag">WHAT REMAINS · ما تبقّى</div>
+        <h2 class="end-title" id="end-title"></h2>
+      </div>
+      <div class="gal-grid" id="gal-grid"></div>
     </div>
-    <div class="gal-grid" id="gal-grid"></div>
-    <div class="final-scene">
-      <div class="fs-room">
-        <div class="fsr-glow"></div>
-        <div class="fsr-floor"></div>
-        <div class="fsr-mon">
-          <div class="fsr-screen">
-            <div class="fsr-photos" id="fsr-photos">
-              <div class="fsr-ph">MC</div><div class="fsr-ph">GTA</div>
-              <div class="fsr-ph">W3</div><div class="fsr-ph">RDR</div>
-              <div class="fsr-ph">ER</div><div class="fsr-ph">↻</div>
-            </div>
-          </div>
-          <div class="fsr-stand"></div>
+    <button class="end-continue-btn" onclick="startCinematic()">شاهد المشهد الأخير ↓</button>
+  </div>
+
+  <!-- Phase 2: Cinematic dark room -->
+  <div id="end-cinematic">
+    <div id="lbox-top"></div>
+    <div id="lbox-bot"></div>
+
+    <div id="cin-room">
+      <div id="cin-floor-glow"></div>
+      <div id="cin-desk"></div>
+
+      <!-- Monitor -->
+      <div id="cin-monitor">
+        <div class="cin-screen">
+          <div id="cin-face-glow"></div>
+          <div id="cin-slideshow"></div>
         </div>
-        <div class="fsr-fig">
-          <div class="fsr-head">
-            <div class="fsr-tear"></div><div class="fsr-tear"></div>
-          </div>
-          <div class="fsr-body"></div>
+        <div class="cin-desk-glow"></div>
+        <div class="cin-stand"></div>
+        <div class="cin-base"></div>
+      </div>
+
+      <!-- Figure sitting -->
+      <div id="cin-figure">
+        <div class="fig-head">
+          <div class="cin-tear"></div>
+          <div class="cin-tear"></div>
+          <div class="cin-tear"></div>
+        </div>
+        <div class="fig-body">
+          <div class="fig-arms"></div>
+        </div>
+        <div class="fig-chair">
+          <div class="fig-chair-back"></div>
+          <div class="fig-chair-seat"></div>
         </div>
       </div>
-      <p class="fs-caption" id="fs-caption"></p>
-      <div class="fs-quote" id="fs-quote"></div>
-      <button class="fs-restart" onclick="location.reload()">العودة من البداية</button>
     </div>
+
+    <!-- Text lines -->
+    <div id="cin-lines">
+      <div class="cin-line" id="cl1"></div>
+      <div class="cin-line" id="cl2"></div>
+      <div class="cin-line" id="cl3"></div>
+      <div class="cin-line-final" id="cl-final"></div>
+    </div>
+
+    <button id="cin-restart" onclick="location.reload()">↺ العودة من البداية</button>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════
-// MUSIC SYSTEM
+// MUSIC SYSTEM — robust with user-gesture unlock
 // ═══════════════════════════════
-const TRACKS = {
+const URLS={
   intro:    'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/intro.mp3',
   gameplay: 'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/gameplay.mp3',
   med2:     'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/med2.mp3',
   end:      'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/end.mp3'
 };
+let _audio=null, _curName=null, _fadeIv=null, _soundOn=false;
 
-// Pre-create audio elements for instant play
-const AUDIO = {};
-Object.entries(TRACKS).forEach(([k,src])=>{
-  const a = new Audio(src);
-  a.loop = true;
-  a.volume = 0;
-  a.preload = 'auto';
-  AUDIO[k] = a;
-});
-
-let currentTrack = null;
-let fadeIv = null;
-
-function playMusic(name, vol=0.55, fadeDur=1200){
-  if(currentTrack === name) return;
-  const prev = currentTrack;
-  currentTrack = name;
-  clearInterval(fadeIv);
-
-  // Fade out previous
-  if(prev && AUDIO[prev]){
-    const old = AUDIO[prev];
-    let ov = old.volume;
-    const step = ov / (fadeDur/50);
-    const fadeOut = setInterval(()=>{
-      ov = Math.max(0, ov - step);
-      old.volume = ov;
-      if(ov <= 0){ clearInterval(fadeOut); old.pause(); old.currentTime=0; }
-    }, 50);
-  }
-
-  // Fade in new
-  if(name && AUDIO[name]){
-    const nw = AUDIO[name];
-    nw.volume = 0;
-    nw.currentTime = 0;
-    nw.play().catch(()=>{});
-    let nv = 0;
-    const step = vol / (fadeDur/50);
-    fadeIv = setInterval(()=>{
-      nv = Math.min(vol, nv + step);
-      nw.volume = nv;
-      if(nv >= vol) clearInterval(fadeIv);
-    }, 50);
-  }
+function _stopCurrent(ms=600,cb=()=>{}){
+  if(!_audio){cb();return;}
+  const a=_audio; clearInterval(_fadeIv);
+  const start=a.volume, step=start/(ms/30);
+  _fadeIv=setInterval(()=>{
+    a.volume=Math.max(0,a.volume-step);
+    if(a.volume<=0){clearInterval(_fadeIv);a.pause();a.src='';cb();}
+  },30);
 }
 
-function stopMusic(fadeDur=800){
-  if(!currentTrack) return;
-  const trk = AUDIO[currentTrack];
-  currentTrack = null;
-  clearInterval(fadeIv);
-  if(!trk) return;
-  let v = trk.volume;
-  const step = v / (fadeDur/50);
-  const iv = setInterval(()=>{
-    v = Math.max(0, v - step);
-    trk.volume = v;
-    if(v <= 0){ clearInterval(iv); trk.pause(); trk.currentTime=0; }
-  }, 50);
+function playMusic(name,vol=0.5,fadeMs=1000){
+  if(!_soundOn||_curName===name)return;
+  _stopCurrent(400,()=>{
+    const a=new Audio(URLS[name]);
+    a.loop=(name!=='end');
+    a.volume=0;
+    a.play().then(()=>{
+      _audio=a; _curName=name; clearInterval(_fadeIv);
+      const step=vol/(fadeMs/30);
+      _fadeIv=setInterval(()=>{
+        a.volume=Math.min(vol,a.volume+step);
+        if(a.volume>=vol)clearInterval(_fadeIv);
+      },30);
+    }).catch(e=>console.warn('Audio blocked:',e));
+  });
 }
 
-// Chapter 2 uses med2 for darker feel
-function musicForChapter(idx){
-  if(idx===0) return 'gameplay';
-  if(idx===1) return 'med2';
-  if(idx===2) return 'med2';
-  return 'gameplay';
+function stopMusic(ms=600){
+  _curName=null;
+  _stopCurrent(ms);
+  _audio=null;
 }
 
-// ── SFX (Web Audio API — short effects only) ──
+function setMusicVol(vol,ms=400){
+  if(!_audio)return;
+  const a=_audio,start=a.volume,step=(vol-start)/(ms/30);
+  let s=0; clearInterval(_fadeIv);
+  _fadeIv=setInterval(()=>{
+    s++;a.volume=Math.max(0,Math.min(1,start+step*s));
+    if(s>=(ms/30))clearInterval(_fadeIv);
+  },30);
+}
+
+function toggleSoundBtn(){
+  _soundOn=!_soundOn;
+  updateSoundBtn();
+  if(_soundOn){ playMusic('intro',0.45,1200); }
+  else { stopMusic(400); }
+}
+
+function updateSoundBtn(){
+  const b=document.getElementById('sound-toggle');
+  if(b) b.textContent=_soundOn?'🔊 الصوت: تشغيل':'🔇 الصوت: إيقاف — انقر لتشغيله';
+}
+// ── SFX ──
 let AudioCtx;
 function getAC(){if(!AudioCtx)AudioCtx=new(window.AudioContext||window.webkitAudioContext)();return AudioCtx;}
 function note(f,t=0,d=.15,v=.2,type='sine'){
@@ -617,37 +848,6 @@ const SFX={
   warn:   ()=>{note(440,0,.08,.18);note(440,.12,.08,.18);},
   beat:   ()=>{note(55,0,.06,.22,'sine');note(50,.07,.08,.13,'sine');},
 };
-
-// setMusicVol — fade current track to new volume
-function setMusicVol(vol, ms=400){
-  if(!currentTrack || !AUDIO[currentTrack]) return;
-  const trk = AUDIO[currentTrack];
-  const start = trk.volume;
-  const steps = 20;
-  let s = 0;
-  const iv = setInterval(()=>{
-    s++;
-    trk.volume = Math.max(0, Math.min(1, start + (vol-start)*(s/steps)));
-    if(s>=steps) clearInterval(iv);
-  }, ms/steps);
-}
-
-// end.mp3 plays once — fix loop flag after preload
-AUDIO['end'].loop = false;
-
-// Sound state
-let soundOn = false;
-function unlockAndPlay(name, vol=0.45){
-  soundOn = true;
-  // Resume AudioContext if suspended
-  if(AudioCtx && AudioCtx.state === 'suspended') AudioCtx.resume();
-  playMusic(name, vol, 1400);
-  updateSoundBtn();
-}
-function updateSoundBtn(){
-  const btn = document.getElementById('sound-toggle');
-  if(btn) btn.textContent = soundOn ? '🔊 الصوت: تشغيل' : '🔇 الصوت: إيقاف';
-}
 
 // ═══════════════════════════════
 // DATA
@@ -845,21 +1045,9 @@ function showWarn(msg,dur=2000){
 // ═══════════════════════════════
 // INTRO → CHAPTER INTRO
 // ═══════════════════════════════
-function toggleSoundBtn(){
-  if(!soundOn){
-    unlockAndPlay('intro', 0.45);
-  } else {
-    soundOn=false;
-    stopMusic(400);
-    updateSoundBtn();
-  }
-  const btn=document.getElementById('sound-toggle');
-  if(btn) btn.style.color='rgba(255,255,255,.5)';
-}
 
 function beginGame(){
-  // Unlock audio on this click
-  if(!soundOn) unlockAndPlay('intro', 0.45);
+  if(!_soundOn){ _soundOn=true; playMusic('intro',0.45,1200); updateSoundBtn(); }
   showChapterIntro(0);
 }
 
@@ -871,7 +1059,7 @@ function showChapterIntro(idx){
   document.getElementById('ci-body').innerHTML=ch.story;
   buildChapterArt(ch.artType);
   go('s-chintro');
-  if(soundOn){
+  if(_soundOn){
     if(idx===1) playMusic('med2',0.4,1200);
     if(idx===2) playMusic('med2',0.5,800);
   }
@@ -904,7 +1092,7 @@ function startChapterGame(){
   buildIdentity();
   go('s-game');
   updateHeader();
-  if(soundOn){
+  if(_soundOn){
     const vol=G.chIdx===0?0.45:G.chIdx===1?0.55:0.65;
     playMusic('gameplay',vol,1000);
   }
@@ -1134,10 +1322,7 @@ function choose(save){
     // Show big overlay word
     overlay.classList.add('on');
     // Briefly duck music
-    if(soundOn&&currentTrack&&AUDIO[currentTrack]){
-      const t=AUDIO[currentTrack];const ov=t.volume;
-      t.volume=ov*.25;setTimeout(()=>{if(t)t.volume=ov;},1400);
-    }
+    if(_audio){ const ov=_audio.volume; _audio.volume=ov*.2; setTimeout(()=>{if(_audio)_audio.volume=ov;},1400); }
     setTimeout(()=>{
       overlay.classList.remove('on');
       card.style.transition='';card.style.filter='';card.style.transform='';
@@ -1154,14 +1339,8 @@ function memLost(forceDel){
   flash('rgba(192,57,43,.35)');
   showWarn(`DELETING: ${mem.game}`,2000);
   card.classList.add('out-lose');
-  // Duck music for dramatic effect
-  if(currentTrack && AUDIO[currentTrack]){
-    const trk=AUDIO[currentTrack];
-    const orig=trk.volume;
-    trk.volume=0.08;
-    setTimeout(()=>{ if(trk) trk.volume=orig; },2200);
-  }
-  // Lose identity
+  // Duck music
+  if(_audio){ const orig=_audio.volume; _audio.volume=0.07; setTimeout(()=>{if(_audio)_audio.volume=orig;},2200); }
   G.identity=Math.max(0,G.identity-2);
   updateIdentity();
   if(!G.lost.includes(mem.game))G.lost.push(mem.game);
@@ -1172,9 +1351,9 @@ function showDelPopup(mem){
   document.getElementById('dp-name').textContent=mem.game;
   document.getElementById('dp-msg').textContent=LOSS_MSG[mem.game]||'هذه الذكرى محذوفة إلى الأبد.';
   document.getElementById('del-popup').classList.add('on');
-  // Briefly duck gameplay music for dramatic effect
-  setMusicVol(0.15, 300);
-  setTimeout(()=>setMusicVol(currentTrack==='gameplay'? (G.chIdx===0?0.45:G.chIdx===1?0.55:0.65) : 0.5, 600), 2000);
+  setMusicVol(0.12,300);
+  const vol=G.chIdx===0?0.45:G.chIdx===1?0.55:0.65;
+  setTimeout(()=>setMusicVol(vol,600),2000);
 }
 
 function dismissDel(){
@@ -1224,43 +1403,127 @@ function updateHeader(){
 // ENDING
 // ═══════════════════════════════
 function endGame(){
-  G.gameActive=false;clearInterval(G.timerIv);setChaos(0);
-  if(soundOn){ stopMusic(800); setTimeout(()=>playMusic('end',0.5,1500),900); }
-  const saved=G.saved.length,total=MEMORIES.length;
-  const savedGames=[...new Set(G.saved.map(m=>m.game))];
+  G.gameActive=false;
+  clearInterval(G.timerIv);
+  setChaos(0);
+  if(_soundOn){ stopMusic(1200); }
 
-  // Dynamic caption + quote
-  let caption,quote;
+  const saved=G.saved.length, total=MEMORIES.length;
+
+  // Gallery title
+  document.getElementById('end-title').textContent =
+    saved>0 ? `هذا ما اخترت أن يبقى — ${saved} من ${total}` : 'لم يتبقَّ شيء في المكتبة';
+
+  // Cinematic lines based on outcome
   if(saved===0){
-    caption='لم يتبقَّ شيء. <strong>النظام أخذ كل شيء.</strong> لكن أنت كنت هناك — وهذا كافٍ.';
-    quote='بعض الذكريات لا تحتاج أن تُحفظ لتبقى حقيقية.';
-  } else if(saved<=3){
-    caption=`أنقذت <strong>${saved} ذكريات</strong> من ${total}. ربما لم يكن كثيراً. لكن ما بقي — اخترته أنت.`;
-    quote='الهوية ليست ما تملك. بل ما تختار أن تحمله.';
-  } else if(saved<=7){
-    caption=`<strong>حملت ما استطعت.</strong> بعض الذكريات ذهبت. بعضها بقي. هذا هو الثمن.`;
-    quote='لا أحد يستطيع أن يحتفظ بكل شيء. وهذا ليس فشلاً.';
+    G._cl1='لم يتبقَّ شيء.';
+    G._cl2='النظام أخذ <strong>كل شيء.</strong>';
+    G._cl3='لكنك كنت هناك — وحاربت.';
+    G._clfinal='وهذا لن يُنسى.';
+  } else if(saved<=4){
+    G._cl1=`أنقذت ${saved} ذكريات من ${total}.`;
+    G._cl2='القليل الذي بقي — <strong>اخترته أنت.</strong>';
+    G._cl3='وهذا يكفي.';
+    G._clfinal='الهوية ليست ما تملك.. بل ما تختار أن تحمله.';
+  } else if(saved<=10){
+    G._cl1=`حملت ${saved} ذكريات على حساب نفسك.`;
+    G._cl2='<strong>الثمن كان غالياً.</strong>';
+    G._cl3='لكنها ما زالت هنا. لم تذهب بعيداً.';
+    G._clfinal='لا أحد يستطيع أن يحتفظ بكل شيء.. وهذا ليس فشلاً.';
   } else {
-    caption=`أنقذت <strong>${saved} ذكريات</strong>. دفعت ثمناً غالياً من هويتك. لكن مكتبتك — ما زالت حية.`;
-    quote='الذاكرة التي تحارب من أجلها تستحق أن تُحكى.';
+    G._cl1=`أنقذت ${saved} ذكريات.`;
+    G._cl2='<strong>دفعت كل ما عندك.</strong>';
+    G._cl3='والمكتبة — ما زالت حية.';
+    G._clfinal='الذاكرة التي تحارب من أجلها.. تستحق أن تُحكى.';
   }
-
-  document.getElementById('fs-caption').innerHTML=caption;
-  document.getElementById('fs-quote').textContent=quote;
-  document.getElementById('end-title').textContent=
-    saved>0?`هذا ما اخترت أن يبقى — ${saved} من ${total}`:'لم يتبقَّ شيء في المكتبة';
 
   buildGallery();
   go('s-end');
   setTimeout(()=>{
     document.querySelectorAll('.gal-item').forEach((el,i)=>{
-      setTimeout(()=>el.classList.add('show'),i*80);
+      setTimeout(()=>el.classList.add('show'), i*70);
     });
   },300);
 }
 
+// ═══════════════════════════════
+// CINEMATIC FINAL SCENE
+// ═══════════════════════════════
+function startCinematic(){
+  const cin = document.getElementById('end-cinematic');
+  cin.classList.add('on');
+
+  // Build slideshow from saved memories
+  buildCinSlideshow();
+
+  // Spawn dust particles
+  spawnDust();
+
+  // Start end music
+  if(_soundOn){ playMusic('end', 0.55, 2000); }
+
+  // Staggered text lines
+  const delays = [3000, 5500, 8000, 11500];
+  const ids = ['cl1','cl2','cl3','cl-final'];
+  const texts = [G._cl1, G._cl2, G._cl3, G._clfinal];
+
+  ids.forEach((id,i)=>{
+    const el = document.getElementById(id);
+    if(el && texts[i]){
+      el.innerHTML = texts[i];
+      setTimeout(()=> el.classList.add('vis'), delays[i]);
+    }
+  });
+
+  // Show restart button last
+  setTimeout(()=>{
+    document.getElementById('cin-restart').classList.add('vis');
+  }, 16000);
+}
+
+function buildCinSlideshow(){
+  const container = document.getElementById('cin-slideshow');
+  container.innerHTML='';
+  const COLORS={
+    'MINECRAFT':'#0d1a0d','GTA V':'#0d0d1a',
+    'THE WITCHER 3':'#0d180d','RED DEAD 2':'#1a0808','ELDEN RING':'#120808'
+  };
+  const LABELS={
+    'MINECRAFT':'MC','GTA V':'GTA','THE WITCHER 3':'W3','RED DEAD 2':'RDR','ELDEN RING':'ER'
+  };
+
+  // Show 6 slots — saved memories glow, lost ones dark
+  const slots = MEMORIES.slice(0,6);
+  slots.forEach((mem,i)=>{
+    const saved = G.saved.find(s=>s.id===mem.id);
+    const div = document.createElement('div');
+    div.className='cin-slide';
+    div.style.cssText=`background:${COLORS[mem.game]||'#0d0d0d'};animation-delay:${i*0.4}s;animation-duration:${3+i*0.5}s;${saved?'':'filter:brightness(0.15)'}`;
+    div.innerHTML=`<div class="cin-slide-label">${saved?LABELS[mem.game]:'—'}</div>`;
+    if(saved){
+      // Add a subtle color hint for saved memories
+      div.style.boxShadow='inset 0 0 20px rgba(255,255,255,0.04)';
+    }
+    container.appendChild(div);
+  });
+}
+
+function spawnDust(){
+  const room = document.getElementById('cin-room');
+  for(let i=0;i<25;i++){
+    const d = document.createElement('div');
+    d.className='dust';
+    const x=Math.random()*100, y=Math.random()*100;
+    const dx=(Math.random()-0.5)*60, dy=-20-Math.random()*60;
+    const dur=8+Math.random()*12, delay=Math.random()*10;
+    d.style.cssText=`left:${x}%;top:${y}%;--dx:${dx}px;--dy:${dy}px;animation-duration:${dur}s;animation-delay:${delay}s;opacity:${Math.random()*0.4+0.1};`;
+    room.appendChild(d);
+  }
+}
+
 function buildGallery(){
-  const grid=document.getElementById('gal-grid');grid.innerHTML='';
+  const grid=document.getElementById('gal-grid');
+  grid.innerHTML='';
   const GRADS={
     'MINECRAFT':'linear-gradient(135deg,#1a2a0d,#0d1a0d)',
     'GTA V':'linear-gradient(135deg,#1a1020,#0d0d1a)',
