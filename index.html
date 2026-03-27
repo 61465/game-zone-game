@@ -318,6 +318,29 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
   color:rgba(255,255,255,.2);background:transparent;border:1px solid rgba(255,255,255,.1);
   padding:12px 36px;cursor:pointer;transition:all .3s;direction:rtl;margin-top:10px;}
 .fs-restart:hover{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.25);}
+/* RELEASE DRAMATIC OVERLAY */
+#release-overlay{
+  position:fixed;inset:0;z-index:600;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .4s;
+}
+#release-overlay.on{opacity:1;}
+.ro-word{
+  font-family:var(--serif);
+  font-size:clamp(40px,8vw,90px);
+  font-weight:900;
+  color:rgba(255,255,255,.06);
+  letter-spacing:8px;
+  text-align:center;
+  direction:rtl;
+  animation:ro-pulse 1.2s ease forwards;
+}
+@keyframes ro-pulse{
+  0%{color:rgba(255,255,255,.0);transform:scale(.8);}
+  30%{color:rgba(255,255,255,.12);transform:scale(1.05);}
+  70%{color:rgba(255,255,255,.06);transform:scale(1);}
+  100%{color:rgba(255,255,255,.0);transform:scale(.95);}
+}
 </style>
 </head>
 <body>
@@ -327,6 +350,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 <div id="vfx-rgb"></div>
 <div id="vfx-noise"></div>
 <div id="ptcl"></div>
+<div id="release-overlay"><div class="ro-word" id="ro-word">تذهب</div></div>
 <div id="sys-warn">
   <span class="sw sw-blink">■</span>
   <span class="sw" id="sw-msg">MEMORY INTEGRITY CRITICAL</span>
@@ -352,6 +376,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
     <span style="color:rgba(255,255,255,.2)">لكن الثمن — هويتك نفسها.</span>
   </p>
   <button class="i-btn" onclick="beginGame()">ابدأ التجربة</button>
+  <button id="sound-toggle" onclick="toggleSoundBtn()" style="
+    margin-top:16px;background:transparent;border:1px solid rgba(255,255,255,.12);
+    color:rgba(255,255,255,.3);font-family:'Cairo',sans-serif;font-size:12px;
+    padding:8px 22px;cursor:pointer;letter-spacing:0;transition:all .3s;
+    animation:fu 1s 1.6s both;
+  ">🔇 الصوت: إيقاف — انقر لتشغيله</button>
   <div class="i-chapters">
     <div class="i-ch act">الفصل الأول: البداية</div>
     <div class="i-ch">الفصل الثاني: الانهيار</div>
@@ -478,39 +508,146 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 
 <script>
 // ═══════════════════════════════
-// AUDIO
+// MUSIC SYSTEM
 // ═══════════════════════════════
+const TRACKS = {
+  intro:    'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/intro.mp3',
+  gameplay: 'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/gameplay.mp3',
+  med2:     'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/med2.mp3',
+  end:      'https://raw.githubusercontent.com/61465/game-zone-game/main/Newfolder/end.mp3'
+};
+
+// Pre-create audio elements for instant play
+const AUDIO = {};
+Object.entries(TRACKS).forEach(([k,src])=>{
+  const a = new Audio(src);
+  a.loop = true;
+  a.volume = 0;
+  a.preload = 'auto';
+  AUDIO[k] = a;
+});
+
+let currentTrack = null;
+let fadeIv = null;
+
+function playMusic(name, vol=0.55, fadeDur=1200){
+  if(currentTrack === name) return;
+  const prev = currentTrack;
+  currentTrack = name;
+  clearInterval(fadeIv);
+
+  // Fade out previous
+  if(prev && AUDIO[prev]){
+    const old = AUDIO[prev];
+    let ov = old.volume;
+    const step = ov / (fadeDur/50);
+    const fadeOut = setInterval(()=>{
+      ov = Math.max(0, ov - step);
+      old.volume = ov;
+      if(ov <= 0){ clearInterval(fadeOut); old.pause(); old.currentTime=0; }
+    }, 50);
+  }
+
+  // Fade in new
+  if(name && AUDIO[name]){
+    const nw = AUDIO[name];
+    nw.volume = 0;
+    nw.currentTime = 0;
+    nw.play().catch(()=>{});
+    let nv = 0;
+    const step = vol / (fadeDur/50);
+    fadeIv = setInterval(()=>{
+      nv = Math.min(vol, nv + step);
+      nw.volume = nv;
+      if(nv >= vol) clearInterval(fadeIv);
+    }, 50);
+  }
+}
+
+function stopMusic(fadeDur=800){
+  if(!currentTrack) return;
+  const trk = AUDIO[currentTrack];
+  currentTrack = null;
+  clearInterval(fadeIv);
+  if(!trk) return;
+  let v = trk.volume;
+  const step = v / (fadeDur/50);
+  const iv = setInterval(()=>{
+    v = Math.max(0, v - step);
+    trk.volume = v;
+    if(v <= 0){ clearInterval(iv); trk.pause(); trk.currentTime=0; }
+  }, 50);
+}
+
+// Chapter 2 uses med2 for darker feel
+function musicForChapter(idx){
+  if(idx===0) return 'gameplay';
+  if(idx===1) return 'med2';
+  if(idx===2) return 'med2';
+  return 'gameplay';
+}
+
+// ── SFX (Web Audio API — short effects only) ──
 let AudioCtx;
 function getAC(){if(!AudioCtx)AudioCtx=new(window.AudioContext||window.webkitAudioContext)();return AudioCtx;}
 function note(f,t=0,d=.15,v=.2,type='sine'){
   try{const ac=getAC(),o=ac.createOscillator(),g=ac.createGain();
   o.connect(g);g.connect(ac.destination);o.type=type;o.frequency.value=f;
-  g.gain.setValueAtTime(0,ac.currentTime+t);g.gain.linearRampToValueAtTime(v,ac.currentTime+t+.01);
+  g.gain.setValueAtTime(0,ac.currentTime+t);
+  g.gain.linearRampToValueAtTime(v,ac.currentTime+t+.01);
   g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);
   o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d+.05);}catch(e){}
 }
-function noise(d=.2,v=.15){
+function sfxNoise(d=.2,v=.15){
   try{const ac=getAC(),buf=ac.createBuffer(1,ac.sampleRate*d,ac.sampleRate),
-  data=buf.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.4;
-  const s=ac.createBufferSource(),g=ac.createGain();s.buffer=buf;s.connect(g);g.connect(ac.destination);
-  g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);
+  data=buf.getChannelData(0);
+  for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.4;
+  const s=ac.createBufferSource(),g=ac.createGain();
+  s.buffer=buf;s.connect(g);g.connect(ac.destination);
+  g.gain.setValueAtTime(v,ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);
   s.start();}catch(e){}
 }
 const SFX={
-  key:    ()=>note(600+Math.random()*200,0,.06,.08),
-  wrong:  ()=>{noise(.1,.2);note(150,0,.2,.25,'sawtooth');},
-  save:   ()=>{[440,554,659,880].forEach((f,i)=>note(f,i*.07,.3,.12));},
-  lose:   ()=>{noise(.4,.25);[200,160,120,80].forEach((f,i)=>note(f,i*.08,.4,.2,'sawtooth'));},
-  chapter:()=>{[261,329,392,523].forEach((f,i)=>note(f,i*.1,.5,.1));},
-  drop:   ()=>{note(200,0,.15,.15,'sawtooth');note(140,.1,.2,.1,'sawtooth');},
-  warn:   ()=>{note(440,0,.08,.2);note(440,.12,.08,.2);},
-  beat:   ()=>{note(55,0,.06,.25,'sine');note(50,.07,.08,.15,'sine');},
-  end:    ()=>{[261,220,196,174].forEach((f,i)=>note(f,i*.5,1.5,.07,'sine'));},
-  ambient:()=>{try{const ac=getAC(),o=ac.createOscillator(),g=ac.createGain();
-    o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=55;
-    g.gain.setValueAtTime(0,ac.currentTime);g.gain.linearRampToValueAtTime(.03,ac.currentTime+2);
-    g.gain.linearRampToValueAtTime(0,ac.currentTime+8);o.start();o.stop(ac.currentTime+8);}catch(e){}}
+  key:    ()=>note(600+Math.random()*200,0,.06,.07),
+  wrong:  ()=>{sfxNoise(.1,.18);note(150,0,.2,.22,'sawtooth');},
+  save:   ()=>{[440,554,659,880].forEach((f,i)=>note(f,i*.07,.3,.1));},
+  lose:   ()=>{sfxNoise(.4,.22);[200,160,120,80].forEach((f,i)=>note(f,i*.08,.4,.18,'sawtooth'));},
+  drop:   ()=>{note(200,0,.15,.13,'sawtooth');note(140,.1,.2,.09,'sawtooth');},
+  warn:   ()=>{note(440,0,.08,.18);note(440,.12,.08,.18);},
+  beat:   ()=>{note(55,0,.06,.22,'sine');note(50,.07,.08,.13,'sine');},
 };
+
+// setMusicVol — fade current track to new volume
+function setMusicVol(vol, ms=400){
+  if(!currentTrack || !AUDIO[currentTrack]) return;
+  const trk = AUDIO[currentTrack];
+  const start = trk.volume;
+  const steps = 20;
+  let s = 0;
+  const iv = setInterval(()=>{
+    s++;
+    trk.volume = Math.max(0, Math.min(1, start + (vol-start)*(s/steps)));
+    if(s>=steps) clearInterval(iv);
+  }, ms/steps);
+}
+
+// end.mp3 plays once — fix loop flag after preload
+AUDIO['end'].loop = false;
+
+// Sound state
+let soundOn = false;
+function unlockAndPlay(name, vol=0.45){
+  soundOn = true;
+  // Resume AudioContext if suspended
+  if(AudioCtx && AudioCtx.state === 'suspended') AudioCtx.resume();
+  playMusic(name, vol, 1400);
+  updateSoundBtn();
+}
+function updateSoundBtn(){
+  const btn = document.getElementById('sound-toggle');
+  if(btn) btn.textContent = soundOn ? '🔊 الصوت: تشغيل' : '🔇 الصوت: إيقاف';
+}
 
 // ═══════════════════════════════
 // DATA
@@ -540,57 +677,83 @@ const CHAPTERS=[
 ];
 
 const MEMORIES=[
-  // Chapter 1
+  // ── CHAPTER 1 — البداية (6 ذكريات) ──
   {id:'mc1',ch:1,game:'MINECRAFT',cost:1,
    title:'أول ليلة في العالم',
-   desc:'لم تكن لديك خريطة ولا دليل. سمعت صوت الزومبي في الظلام. بنيت جداراً من الطين وانتظرت الفجر.',
+   desc:'لم تكن لديك خريطة ولا دليل. سمعت صوت الزومبي في الظلام. بنيت جداراً من الطين وانتظرت الفجر وحيداً.',
    endMoment:'أول عالم بنيته'},
   {id:'gta1',ch:1,game:'GTA V',cost:1,
    title:'أول مرة تطير بطائرة',
-   desc:'حلّقت فوق Los Santos في الساعة الثالثة صباحاً. المدينة كالنجوم تحتك. شعرت بحرية مطلقة.',
+   desc:'حلّقت فوق Los Santos في الساعة الثالثة صباحاً. المدينة كالنجوم تحتك. شعرت بحرية لم تجدها في الواقع.',
    endMoment:'سماء Los Santos'},
   {id:'w31',ch:1,game:'THE WITCHER 3',cost:2,
    title:'لقاء Yennefer في Skellige',
-   desc:'وقفا على حافة الجرف. البحر أمامهما. لم يكن الحوار مجرد نص — كان وداعاً أو لقاءً.',
+   desc:'وقفا على حافة الجرف والبحر أمامهما. لم يكن الحوار مجرد نص — كان وداعاً أو لقاءً. وكان القرار لك.',
    endMoment:'حافة Skellige'},
   {id:'rdr1',ch:1,game:'RED DEAD 2',cost:1,
    title:'ليلة النجوم مع Hosea',
-   desc:'قعدا بجانب النار وتكلما عن الحياة. Arthur كان يضحك. لم يكن يعرف ما ينتظره.',
+   desc:'قعدا بجانب النار وتكلما عن الحياة والحلم. Arthur كان يضحك. لم يكن يعرف ما ينتظره.',
    endMoment:'النار والنجوم'},
-  // Chapter 2
+  {id:'er0',ch:1,game:'ELDEN RING',cost:1,
+   title:'أول خطوة في Limgrave',
+   desc:'خرجت من القبر إلى ضوء الشمس. العالم أمامك لا نهاية له. لم يكن هناك دليل. فقط الأفق.',
+   endMoment:'بداية الرحلة'},
+  {id:'mc0',ch:1,game:'MINECRAFT',cost:1,
+   title:'أول شروق شمس رأيته',
+   desc:'بعد ليلة خوف خلف الجدران، طلعت الشمس. الغابة الخضراء والسماء البرتقالية. كان أجمل شروق في حياتك.',
+   endMoment:'شروق الفجر الأول'},
+
+  // ── CHAPTER 2 — الانهيار (6 ذكريات) ──
   {id:'mc2',ch:2,game:'MINECRAFT',cost:2,
    title:'خسارة البناء الكبير',
-   desc:'لعبت ثلاثة أشهر على الخادم. ثم أُعيد تشغيله. القلعة، النفق، كل شيء — اختفى في ثانية.',
+   desc:'لعبت ثلاثة أشهر على الخادم. ثم أُعيد تشغيله. القلعة، النفق، المزرعة — كل شيء اختفى في ثانية.',
    endMoment:'ما لم يُبنَ مرة أخرى'},
   {id:'er1',ch:2,game:'ELDEN RING',cost:2,
    title:'هزيمة Margit لأول مرة',
-   desc:'فشلت 27 مرة. في الثامنة والعشرين ضربته الضربة الأخيرة. جلست صامتاً. النصر كان ثقيلاً.',
+   desc:'فشلت 27 مرة. في الثامنة والعشرين ضربته الضربة الأخيرة ومات. جلست صامتاً. النصر كان ثقيلاً.',
    endMoment:'النصر الثقيل'},
   {id:'w32',ch:2,game:'THE WITCHER 3',cost:2,
    title:'نهاية Ciri المؤلمة',
-   desc:'رأيتها تمشي في الثلج وحيدة. لا موسيقى، لا كلام. فقط هي والبياض. بقيت جالساً دقائق.',
+   desc:'رأيتها تمشي في الثلج وحيدة. لا موسيقى، لا كلام. فقط هي والبياض. الشاشة اسودّت. بقيت جالساً.',
    endMoment:'الثلج الأبيض'},
   {id:'rdr2',ch:2,game:'RED DEAD 2',cost:3,
    title:'موت Arthur Morgan',
-   desc:'صعد الجبل وهو يسعل. شروق الشمس كان خلفه. قال لك "شكراً". ثم انتهى كل شيء.',
+   desc:'صعد الجبل وهو يسعل. شروق الشمس خلفه. قال لك "شكراً". ثم انتهى كل شيء. لم تتحرك دقائق.',
    endMoment:'شروق الجبل'},
-  // Chapter 3
+  {id:'gta2a',ch:2,game:'GTA V',cost:2,
+   title:'مطاردة الشرطة الكبرى',
+   desc:'خمس نجوم وكل مدينة خلفك. ركضت ساعة كاملة. في النهاية صعدت جبلاً وجلست تنظر للأسفل.',
+   endMoment:'قمة الجبل'},
+  {id:'er1b',ch:2,game:'ELDEN RING',cost:2,
+   title:'اكتشاف Nokron تحت الأرض',
+   desc:'سقطت في حفرة ظننتها نهايتك. وجدت مدينة كاملة تحت الأرض. نجوم تضيء السقف. شعرت أنك اكتشفت سراً.',
+   endMoment:'النجوم تحت الأرض'},
+
+  // ── CHAPTER 3 — الخسارة (6 ذكريات) ──
   {id:'er2',ch:3,game:'ELDEN RING',cost:3,
    title:'Malenia — الهزيمة الكاملة',
-   desc:'مات شخصيتك 64 مرة. أصبحت تحترمها، تكرهها، تفهمها. لا لعبة علّمتك الصبر أكثر منها.',
+   desc:'مات شخصيتك 64 مرة. في كل مرة نفس الكمال المؤلم. أصبحت تحترمها وتكرهها وتفهمها في آنٍ واحد.',
    endMoment:'64 محاولة'},
   {id:'gta2',ch:3,game:'GTA V',cost:2,
    title:'نهاية Trevor الفجائية',
-   desc:'لم تتوقعها. كانت بدون موسيقى وبدون وداع. شعرت أنك أنت من قرر. وأنك أخطأت.',
-   endMoment:'القرار الخاطئ'},
+   desc:'لم تتوقعها. كانت بدون موسيقى وبدون وداع. شعرت أنك أنت من قرر. وأنك ربما أخطأت.',
+   endMoment:'القرار الذي لا يُنسى'},
   {id:'mc3',ch:3,game:'MINECRAFT',cost:1,
    title:'العالم الذي شاركته مع صديق',
-   desc:'لعبتما معاً صيف كامل. بنيتما مدينة كاملة. ثم انفصلتما. لا يزال الخادم موجوداً. لكن أحداً لا يدخله.',
+   desc:'لعبتما معاً صيف كامل. بنيتما مدينة. ثم انفصلتما. لا يزال الخادم موجوداً. لكن أحداً لا يدخله.',
    endMoment:'المدينة الفارغة'},
   {id:'rdr3',ch:3,game:'RED DEAD 2',cost:3,
    title:'John Marston يبني مزرعته',
-   desc:'بعد كل شيء، أراد فقط أرضاً وأسرة. رأيته يدق المسامير ببطء. كان سعيداً. وأنت تعرفت كيف ستنتهي.',
-   endMoment:'المزرعة والأمل'}
+   desc:'بعد كل شيء، أراد فقط أرضاً وأسرة. رأيته يدق المسامير ببطء. كان سعيداً. وأنت تعلم كيف ستنتهي.',
+   endMoment:'المزرعة والأمل المكذوب'},
+  {id:'w33',ch:3,game:'THE WITCHER 3',cost:2,
+   title:'وداع Geralt للمدينة الأخيرة',
+   desc:'ركب Roach وغادر. الموسيقى بدأت بهدوء. لم يلتفت. وأنت جلست تنظر للشاشة بعد انتهاء اللعبة.',
+   endMoment:'الرحيل الأخير'},
+  {id:'gta3',ch:3,game:'GTA V',cost:1,
+   title:'غروب Los Santos الأخير',
+   desc:'وقفت على سطح ناطحة سحاب. الشمس تغرب خلف المدينة. لم يكن هناك مهمة. فقط اللحظة.',
+   endMoment:'الغروب الذهبي'}
 ];
 
 const LOSS_MSG={
@@ -682,8 +845,21 @@ function showWarn(msg,dur=2000){
 // ═══════════════════════════════
 // INTRO → CHAPTER INTRO
 // ═══════════════════════════════
+function toggleSoundBtn(){
+  if(!soundOn){
+    unlockAndPlay('intro', 0.45);
+  } else {
+    soundOn=false;
+    stopMusic(400);
+    updateSoundBtn();
+  }
+  const btn=document.getElementById('sound-toggle');
+  if(btn) btn.style.color='rgba(255,255,255,.5)';
+}
+
 function beginGame(){
-  SFX.chapter();
+  // Unlock audio on this click
+  if(!soundOn) unlockAndPlay('intro', 0.45);
   showChapterIntro(0);
 }
 
@@ -695,7 +871,10 @@ function showChapterIntro(idx){
   document.getElementById('ci-body').innerHTML=ch.story;
   buildChapterArt(ch.artType);
   go('s-chintro');
-  SFX.chapter();
+  if(soundOn){
+    if(idx===1) playMusic('med2',0.4,1200);
+    if(idx===2) playMusic('med2',0.5,800);
+  }
 }
 
 function buildChapterArt(type){
@@ -725,7 +904,10 @@ function startChapterGame(){
   buildIdentity();
   go('s-game');
   updateHeader();
-  SFX.ambient();
+  if(soundOn){
+    const vol=G.chIdx===0?0.45:G.chIdx===1?0.55:0.65;
+    playMusic('gameplay',vol,1000);
+  }
   setTimeout(()=>nextMem(),400);
 }
 
@@ -938,9 +1120,29 @@ function choose(save){
       memLost(false);
     }
   } else {
+    // DRAMATIC RELEASE — not just blur
     SFX.drop();
-    card.style.opacity='.25';card.style.filter='blur(2px)';
-    setTimeout(()=>{card.style.opacity='';card.style.filter='';card.className='mem-card';nextMem();},500);
+    const overlay=document.getElementById('release-overlay');
+    const word=document.getElementById('ro-word');
+    // Pick a phrase based on chapter
+    const phrases=['تذهب..','للأبد..','وداعاً..'];
+    word.textContent=phrases[G.chIdx]||'تذهب..';
+    // Freeze card then dissolve
+    card.style.transition='all 1.2s ease';
+    card.style.filter='brightness(.4) blur(1px)';
+    card.style.transform='scale(.97)';
+    // Show big overlay word
+    overlay.classList.add('on');
+    // Briefly duck music
+    if(soundOn&&currentTrack&&AUDIO[currentTrack]){
+      const t=AUDIO[currentTrack];const ov=t.volume;
+      t.volume=ov*.25;setTimeout(()=>{if(t)t.volume=ov;},1400);
+    }
+    setTimeout(()=>{
+      overlay.classList.remove('on');
+      card.style.transition='';card.style.filter='';card.style.transform='';
+      card.className='mem-card';nextMem();
+    },1300);
   }
 }
 
@@ -948,9 +1150,17 @@ function memLost(forceDel){
   G.waiting=true;
   const mem=G.curMem;
   const card=document.getElementById('mem-card');
-  SFX.lose();flash('rgba(192,57,43,.35)');
+  SFX.lose();
+  flash('rgba(192,57,43,.35)');
   showWarn(`DELETING: ${mem.game}`,2000);
   card.classList.add('out-lose');
+  // Duck music for dramatic effect
+  if(currentTrack && AUDIO[currentTrack]){
+    const trk=AUDIO[currentTrack];
+    const orig=trk.volume;
+    trk.volume=0.08;
+    setTimeout(()=>{ if(trk) trk.volume=orig; },2200);
+  }
   // Lose identity
   G.identity=Math.max(0,G.identity-2);
   updateIdentity();
@@ -962,6 +1172,9 @@ function showDelPopup(mem){
   document.getElementById('dp-name').textContent=mem.game;
   document.getElementById('dp-msg').textContent=LOSS_MSG[mem.game]||'هذه الذكرى محذوفة إلى الأبد.';
   document.getElementById('del-popup').classList.add('on');
+  // Briefly duck gameplay music for dramatic effect
+  setMusicVol(0.15, 300);
+  setTimeout(()=>setMusicVol(currentTrack==='gameplay'? (G.chIdx===0?0.45:G.chIdx===1?0.55:0.65) : 0.5, 600), 2000);
 }
 
 function dismissDel(){
@@ -987,10 +1200,9 @@ function addSavedItem(mem){
 function chapterDone(){
   G.gameActive=false;clearInterval(G.timerIv);setChaos(0);
   if(G.chIdx<CHAPTERS.length-1){
-    // Show next chapter intro
     setTimeout(()=>{
       G.chIdx++;
-      G.identity=Math.min(G.maxId,G.identity+3); // partial restore
+      G.identity=Math.min(G.maxId,G.identity+3);
       G.gameActive=true;
       showChapterIntro(G.chIdx);
     },800);
@@ -1012,7 +1224,8 @@ function updateHeader(){
 // ENDING
 // ═══════════════════════════════
 function endGame(){
-  SFX.end();setChaos(0);
+  G.gameActive=false;clearInterval(G.timerIv);setChaos(0);
+  if(soundOn){ stopMusic(800); setTimeout(()=>playMusic('end',0.5,1500),900); }
   const saved=G.saved.length,total=MEMORIES.length;
   const savedGames=[...new Set(G.saved.map(m=>m.game))];
 
