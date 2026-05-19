@@ -3,7 +3,11 @@ const TLS_BASE = '/game-zone-game';
 const TLS_ASSETS = [
     TLS_BASE + '/',
     TLS_BASE + '/index.html',
-    TLS_BASE + '/manifest.json'
+    TLS_BASE + '/manifest.json',
+    TLS_BASE + '/New%20folder/intro.mp3',
+    TLS_BASE + '/New%20folder/game%20play.mp3',
+    TLS_BASE + '/New%20folder/med2.mp3',
+    TLS_BASE + '/New%20folder/end.mp3'
 ];
 
 self.addEventListener('install', e => {

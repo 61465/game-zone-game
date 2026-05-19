@@ -446,6 +446,38 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 .ro-word{font-family:var(--serif);font-size:clamp(40px,8vw,90px);font-weight:900;color:rgba(255,255,255,.06);letter-spacing:8px;text-align:center;direction:rtl;animation:ro-pulse 1.2s ease forwards;}
 @keyframes ro-pulse{0%{color:rgba(255,255,255,.0);transform:scale(.8);}30%{color:rgba(255,255,255,.14);transform:scale(1.05);}70%{color:rgba(255,255,255,.06);transform:scale(1);}100%{color:rgba(255,255,255,.0);transform:scale(.95);}}
 
+/* GAME AURA */
+#game-aura{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;
+  transition:background 2.5s ease,opacity 1.2s ease;}
+
+/* CHAPTER RECAP */
+#ch-recap{
+  position:fixed;inset:0;z-index:700;background:rgba(3,3,10,.96);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+#ch-recap.on{opacity:1;}
+.cr-inner{text-align:center;direction:rtl;}
+.cr-label{font-family:var(--mono);font-size:10px;letter-spacing:6px;color:rgba(201,168,76,.5);margin-bottom:24px;direction:ltr;}
+.cr-saved{font-family:var(--serif);font-size:clamp(28px,5vw,52px);font-weight:900;color:var(--white);margin-bottom:8px;}
+.cr-score{font-family:var(--mono);font-size:16px;color:var(--cyan);letter-spacing:3px;margin-bottom:30px;}
+.cr-next{font-family:var(--mono);font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.2);animation:blink 1.5s infinite;}
+
+/* CARD HEARTBEAT on entry */
+@keyframes card-heartbeat{
+  0%{box-shadow:0 0 0 transparent;}
+  40%{box-shadow:0 0 50px var(--cur-accent,rgba(201,168,76,.3));}
+  100%{box-shadow:0 0 0 transparent;}
+}
+.mem-card.in{animation:card-heartbeat .8s ease-out forwards;}
+
+/* CODE DECRYPT: chars appear with delay */
+.code-char{opacity:0;transition:opacity .12s ease;}
+.code-char.visible{opacity:1;}
+
+/* TYPING CURSOR blink on mc-desc */
+.mc-desc .cursor{display:inline-block;width:7px;height:1em;background:rgba(255,255,255,.4);vertical-align:text-bottom;animation:blink .7s infinite;margin-right:2px;}
+
 /* Mobile responsive tweaks */
 @media(max-width:600px){
   .mem-card{padding:24px 22px 20px;}
@@ -460,6 +492,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 
 <!-- STARFIELD CANVAS -->
 <canvas id="star-canvas"></canvas>
+<div id="game-aura"></div>
+
+<!-- CHAPTER RECAP OVERLAY -->
+<div id="ch-recap">
+  <div class="cr-inner">
+    <div class="cr-label" id="cr-label">CHAPTER I — مكتمل</div>
+    <div class="cr-saved" id="cr-saved"></div>
+    <div class="cr-score" id="cr-score"></div>
+    <div class="cr-next" id="cr-next">الفصل التالي يبدأ...</div>
+  </div>
+</div>
 
 <!-- GLOBAL LAYERS -->
 <div id="vfx"><div class="vfx-line" id="vl1"></div><div class="vfx-line" id="vl2"></div></div>
@@ -826,6 +869,64 @@ function loadRecord(){
 loadRecord();
 
 // ═══════════════════════════════
+// ATMOSPHERE FUNCTIONS
+// ═══════════════════════════════
+const GAME_AURA_COLORS={
+  'MINECRAFT':     'rgba(76,175,80,0.028)',
+  'GTA V':         'rgba(156,39,176,0.028)',
+  'THE WITCHER 3': 'rgba(139,195,74,0.025)',
+  'RED DEAD 2':    'rgba(255,87,34,0.03)',
+  'ELDEN RING':    'rgba(255,215,0,0.032)',
+  'GOD OF WAR':    'rgba(196,30,58,0.03)',
+  'THE LAST OF US':'rgba(255,193,7,0.028)',
+  'PORTAL 2':      'rgba(255,152,0,0.028)',
+};
+
+function setGameAura(game){
+  const el=document.getElementById('game-aura');
+  if(!el)return;
+  if(game&&GAME_AURA_COLORS[game]){
+    el.style.background=`radial-gradient(ellipse 100% 70% at 50% 10%,${GAME_AURA_COLORS[game]},transparent 65%)`;
+    el.style.opacity='1';
+  } else {
+    el.style.opacity='0';
+  }
+}
+
+let _typeIv=null;
+function typeText(el,text,speed=14,cb=null){
+  clearInterval(_typeIv);
+  el.innerHTML='';
+  let i=0;
+  const cursor=document.createElement('span');cursor.className='cursor';
+  el.appendChild(cursor);
+  _typeIv=setInterval(()=>{
+    if(i<text.length){
+      el.insertBefore(document.createTextNode(text[i++]),cursor);
+    } else {
+      clearInterval(_typeIv);
+      cursor.remove();
+      if(cb)cb();
+    }
+  },speed);
+}
+
+function glitchReveal(el,finalText,duration=550){
+  const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ#@!%&0123456789';
+  const steps=Math.floor(duration/45);
+  let frame=0;
+  const iv=setInterval(()=>{
+    frame++;
+    const progress=frame/steps;
+    if(frame>=steps){el.textContent=finalText;clearInterval(iv);return;}
+    el.textContent=[...finalText].map((c,i)=>{
+      if(i<Math.floor(progress*finalText.length))return c;
+      return c===' '?' ':CHARS[Math.floor(Math.random()*CHARS.length)];
+    }).join('');
+  },45);
+}
+
+// ═══════════════════════════════
 // MOBILE KEYBOARD
 // ═══════════════════════════════
 document.querySelectorAll('.mk-btn').forEach(btn=>{
@@ -1163,14 +1264,13 @@ function showMemCard(mem){
   arena.style.display='flex';
   choice.classList.remove('show');
 
-  // Apply game colors
   const bar=document.getElementById('mc-bar');
   const gameEl=document.getElementById('mc-game');
   bar.setAttribute('data-game',mem.game);
   gameEl.setAttribute('data-game',mem.game);
-  gameEl.textContent=mem.game;
+  gameEl.textContent='';
   document.getElementById('mc-title').textContent=mem.title;
-  document.getElementById('mc-desc').textContent=mem.desc;
+  document.getElementById('mc-desc').textContent='';
 
   const slots=document.getElementById('mc-slots');
   slots.innerHTML='';
@@ -1180,15 +1280,22 @@ function showMemCard(mem){
     slots.appendChild(s);
   }
 
+  // Set ambient aura for this game
+  setGameAura(mem.game);
+
   G.phase='typing';
   syncMobileKb();
   updateHeader();
 
   setTimeout(()=>{
     card.classList.add('in');
+    // Glitch reveal game name
+    glitchReveal(gameEl, mem.game, 500);
+    // Typewriter for description
+    typeText(document.getElementById('mc-desc'), mem.desc, 13);
     generateCode(CHAPTERS[G.chIdx].codes);
     startTimer(CHAPTERS[G.chIdx].timerMax);
-  },150);
+  },160);
 }
 
 // ═══════════════════════════════
@@ -1208,12 +1315,23 @@ function generateCode(len){
 
 function renderCode(){
   const c=document.getElementById('g-code');c.innerHTML='';
+  const POOL_CHARS='ASDFJKLM';
   [...G.code].forEach((ch,i)=>{
     const d=document.createElement('div');d.className='code-char';d.id=`cc-${i}`;
     if(i<G.codeIdx)d.classList.add('done');
     else if(i===G.codeIdx)d.classList.add('cur');
-    d.textContent=ch;
+    d.textContent='?';
     c.appendChild(d);
+    // Staggered decrypt reveal
+    const delay=i*70;
+    setTimeout(()=>{
+      d.classList.add('visible');
+      let g=0;
+      const giv=setInterval(()=>{
+        if(g<3){d.textContent=POOL_CHARS[Math.floor(Math.random()*POOL_CHARS.length)];g++;}
+        else{d.textContent=ch;clearInterval(giv);}
+      },55);
+    },delay);
   });
 }
 
@@ -1404,13 +1522,28 @@ function addSavedItem(mem){
 // ═══════════════════════════════
 function chapterDone(){
   G.gameActive=false;clearInterval(G.timerIv);setChaos(0);
+  setGameAura(null);
+
   if(G.chIdx<CHAPTERS.length-1){
+    const ch=CHAPTERS[G.chIdx];
+    const chSaved=G.saved.filter(m=>m.ch===ch.id).length;
+    const chTotal=MEMORIES.filter(m=>m.ch===ch.id).length;
+    const recap=document.getElementById('ch-recap');
+    document.getElementById('cr-label').textContent=`CHAPTER ${ch.roman} — ${ch.name} · مكتمل`;
+    document.getElementById('cr-saved').textContent=`${chSaved} / ${chTotal} ذكريات محفوظة`;
+    document.getElementById('cr-score').textContent=`SCORE: ${String(G.score).padStart(5,'0')}`;
+    const nextCh=CHAPTERS[G.chIdx+1];
+    document.getElementById('cr-next').textContent=`الفصل التالي: ${nextCh.name}`;
+    recap.classList.add('on');
     setTimeout(()=>{
-      G.chIdx++;
-      G.identity=Math.min(G.maxId,G.identity+3);
-      G.gameActive=true;
-      showChapterIntro(G.chIdx);
-    },800);
+      recap.classList.remove('on');
+      setTimeout(()=>{
+        G.chIdx++;
+        G.identity=Math.min(G.maxId,G.identity+3);
+        G.gameActive=true;
+        showChapterIntro(G.chIdx);
+      },500);
+    },2800);
   } else {
     setTimeout(()=>endGame(),800);
   }
@@ -1440,18 +1573,33 @@ function endGame(){
   document.getElementById('end-title').textContent=
     saved>0?`هذا ما اخترت أن يبقى — ${saved} من ${total}`:'لم يتبقَّ شيء في المكتبة';
 
+  const savedGames=[...new Set(G.saved.map(m=>m.game))];
+  const g1=savedGames[0]||'';
+  const g2=savedGames[1]||'';
+  const gList=savedGames.length>0
+    ? savedGames.slice(0,3).map(g=>`<strong>${g}</strong>`).join(' و ')
+    : '';
+
   if(saved===0){
-    G._cl1='لم يتبقَّ شيء.';G._cl2='النظام أخذ <strong>كل شيء.</strong>';
-    G._cl3='لكنك كنت هناك — وحاربت.';G._clfinal='وهذا لن يُنسى.';
+    G._cl1='النظام أخذ كل شيء.';
+    G._cl2='لم تبقَ <strong>ذاكرة واحدة.</strong>';
+    G._cl3='لكنك خضت المعركة. وهذا لا يُمحى.';
+    G._clfinal='الشيء الوحيد الذي لا يُحذف — أنك كنت هنا.';
   } else if(saved<=4){
-    G._cl1=`أنقذت ${saved} ذكريات من ${total}.`;G._cl2='القليل الذي بقي — <strong>اخترته أنت.</strong>';
-    G._cl3='وهذا يكفي.';G._clfinal='الهوية ليست ما تملك.. بل ما تختار أن تحمله.';
-  } else if(saved<=10){
-    G._cl1=`حملت ${saved} ذكريات على حساب نفسك.`;G._cl2='<strong>الثمن كان غالياً.</strong>';
-    G._cl3='لكنها ما زالت هنا. لم تذهب بعيداً.';G._clfinal='لا أحد يستطيع أن يحتفظ بكل شيء.. وهذا ليس فشلاً.';
+    G._cl1=`أنقذت ${saved} ذكريات من ${total}.`;
+    G._cl2=gList?`${gList} — <strong>ما زالت هنا.</strong>`:'القليل بقي. القليل يكفي.';
+    G._cl3='الهوية ليست ما تملك.. بل ما تختار أن تحمله.';
+    G._clfinal='وأنت اخترت. وهذا يكفي.';
+  } else if(saved<=14){
+    G._cl1=`حملت ${saved} ذكرى على حساب نفسك.`;
+    G._cl2=gList?`${gList}.<br>كلها ما زالت معك.`:'<strong>الثمن كان غالياً.</strong>';
+    G._cl3='لكنها لم تذهب. لم تختفِ. بقيت.';
+    G._clfinal='لا أحد يحتفظ بكل شيء — لكنك حاولت. وهذا نادر.';
   } else {
-    G._cl1=`أنقذت ${saved} ذكريات.`;G._cl2='<strong>دفعت كل ما عندك.</strong>';
-    G._cl3='والمكتبة — ما زالت حية.';G._clfinal='الذاكرة التي تحارب من أجلها.. تستحق أن تُحكى.';
+    G._cl1=`أنقذت ${saved} ذكرى من ${total}.`;
+    G._cl2=gList?`${gList}.<br><strong>دفعت كل ما عندك.</strong>`:'<strong>دفعت كل ما عندك.</strong>';
+    G._cl3='والمكتبة — ما زالت حية.';
+    G._clfinal='الذاكرة التي تحارب من أجلها تستحق أن تُحكى.';
   }
 
   buildGallery();
