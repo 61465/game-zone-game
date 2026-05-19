@@ -1,4 +1,4 @@
-const TLS_CACHE = 'tls-v1';
+const TLS_CACHE = 'tls-v2';
 const TLS_BASE = '/game-zone-game';
 const TLS_ASSETS = [
     TLS_BASE + '/',
