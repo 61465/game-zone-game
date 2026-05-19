@@ -478,6 +478,110 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 /* TYPING CURSOR blink on mc-desc */
 .mc-desc .cursor{display:inline-block;width:7px;height:1em;background:rgba(255,255,255,.4);vertical-align:text-bottom;animation:blink .7s infinite;margin-right:2px;}
 
+/* SACRIFICE BUTTON */
+#sacrifice-btn{
+  position:absolute;left:16px;bottom:calc(148px + var(--mob-kb));
+  font-family:var(--arabic);font-size:11px;font-weight:700;letter-spacing:0;
+  background:rgba(192,57,43,.08);border:1px solid rgba(192,57,43,.3);
+  color:rgba(192,57,43,.7);padding:8px 16px;cursor:pointer;
+  transition:all .3s;display:none;z-index:70;direction:rtl;
+  animation:blink 2s infinite;
+}
+#sacrifice-btn:hover{background:rgba(192,57,43,.18);border-color:rgba(192,57,43,.6);color:var(--red);animation:none;}
+
+/* KEYWORD DISPLAY */
+#g-keyword{
+  display:none;font-family:var(--mono);font-size:9px;letter-spacing:4px;
+  color:rgba(201,168,76,.4);text-align:center;direction:ltr;
+  margin-bottom:4px;
+}
+#g-kw-text{color:rgba(201,168,76,.8);font-weight:700;animation:blink 1.4s infinite;}
+
+/* SACRIFICE OVERLAY */
+#sac-overlay{
+  position:fixed;inset:0;z-index:600;background:rgba(3,3,10,.94);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .4s ease;
+}
+#sac-overlay.on{opacity:1;pointer-events:all;}
+.sac-box{text-align:center;max-width:480px;width:90%;direction:rtl;}
+.sac-tag{font-family:var(--mono);font-size:9px;letter-spacing:5px;color:rgba(192,57,43,.5);margin-bottom:14px;}
+.sac-title{font-family:var(--serif);font-size:clamp(20px,3.5vw,32px);font-weight:900;color:var(--white);margin-bottom:8px;}
+.sac-sub{font-size:12px;color:rgba(255,255,255,.3);margin-bottom:28px;line-height:1.8;font-weight:300;}
+.sac-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;margin-bottom:20px;}
+.sac-item{
+  font-family:var(--arabic);font-size:13px;font-weight:600;
+  padding:12px 20px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.03);cursor:pointer;transition:all .25s;
+  text-align:right;display:flex;justify-content:space-between;align-items:center;
+}
+.sac-item:hover{background:rgba(192,57,43,.12);border-color:rgba(192,57,43,.4);}
+.sac-item-game{font-family:var(--mono);font-size:9px;letter-spacing:2px;opacity:.5;}
+.sac-cancel{
+  font-family:var(--mono);font-size:10px;letter-spacing:3px;
+  background:transparent;border:1px solid rgba(255,255,255,.1);
+  color:rgba(255,255,255,.3);padding:10px 28px;cursor:pointer;transition:all .3s;
+}
+.sac-cancel:hover{border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.5);}
+
+/* STATS SCREEN */
+#stats-screen{
+  position:fixed;inset:0;z-index:650;background:rgba(3,3,10,.97);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .5s ease;
+}
+#stats-screen.on{opacity:1;pointer-events:all;}
+.st-inner{text-align:center;max-width:520px;width:90%;direction:rtl;}
+.st-tag{font-family:var(--mono);font-size:9px;letter-spacing:6px;color:rgba(201,168,76,.4);margin-bottom:36px;direction:ltr;}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:40px;}
+.st-cell{
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  padding:20px 16px;text-align:center;
+}
+.st-val{font-family:var(--mono);font-size:clamp(22px,4vw,36px);font-weight:700;color:var(--cyan);margin-bottom:6px;}
+.st-lbl{font-size:11px;color:rgba(255,255,255,.3);font-weight:300;letter-spacing:0;line-height:1.5;}
+.st-cinematic-btn{
+  font-family:var(--arabic);font-size:14px;font-weight:600;letter-spacing:0;
+  color:rgba(201,168,76,.8);background:rgba(201,168,76,.07);
+  border:1px solid rgba(201,168,76,.3);padding:14px 48px;cursor:pointer;
+  transition:all .4s;direction:rtl;
+}
+.st-cinematic-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold2);}
+
+/* SECRET ENDING */
+#secret-end{
+  position:fixed;inset:0;z-index:900;background:#000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .8s ease;
+}
+#secret-end.on{opacity:1;pointer-events:all;}
+#se-lines{text-align:center;direction:rtl;max-width:600px;}
+.se-line{
+  font-family:var(--arabic);font-size:clamp(15px,2.2vw,20px);font-weight:300;
+  color:rgba(255,255,255,0);line-height:2.2;letter-spacing:0;
+  transition:color 2s ease;
+}
+.se-line.vis{color:rgba(255,255,255,.6);}
+.se-big{
+  font-family:var(--serif);font-size:clamp(32px,7vw,80px);font-weight:900;
+  color:rgba(201,168,76,0);letter-spacing:4px;margin:24px 0 12px;
+  transition:color 3s ease,text-shadow 3s ease;text-shadow:0 0 0 transparent;
+  direction:ltr;
+}
+.se-big.vis{color:var(--gold2);text-shadow:0 0 80px rgba(201,168,76,.5),0 0 40px rgba(201,168,76,.3);}
+.se-final{
+  font-family:var(--mono);font-size:12px;letter-spacing:6px;
+  color:rgba(255,255,255,0);transition:color 2s ease;direction:ltr;
+}
+.se-final.vis{color:rgba(255,255,255,.35);}
+#se-restart{
+  position:absolute;bottom:5vh;font-family:var(--arabic);font-size:12px;
+  color:rgba(255,255,255,.15);background:transparent;border:none;cursor:pointer;
+  transition:color .5s;opacity:0;direction:rtl;
+}
+#se-restart.vis{opacity:1;}
+#se-restart:hover{color:rgba(255,255,255,.4);}
+
 /* Mobile responsive tweaks */
 @media(max-width:600px){
   .mem-card{padding:24px 22px 20px;}
@@ -524,6 +628,38 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
   </div>
 </div>
 <div id="share-toast">✓ تم النسخ</div>
+
+<!-- SACRIFICE OVERLAY -->
+<div id="sac-overlay">
+  <div class="sac-box">
+    <div class="sac-tag">— تضحية بذاكرة —</div>
+    <div class="sac-title">اختر ما ستتركه</div>
+    <div class="sac-sub">ذاكرة واحدة مقابل +3 هوية · هذا القرار لا يُعاد</div>
+    <div class="sac-list" id="sac-list"></div>
+    <button class="sac-cancel" onclick="closeSacrifice()">إلغاء</button>
+  </div>
+</div>
+
+<!-- STATS SCREEN -->
+<div id="stats-screen">
+  <div class="st-inner">
+    <div class="st-tag">— سجل المعركة —</div>
+    <div class="st-grid" id="st-grid"></div>
+    <button class="st-cinematic-btn" onclick="startCinematic()">شاهد المشهد الأخير ↓</button>
+  </div>
+</div>
+
+<!-- SECRET ENDING -->
+<div id="secret-end">
+  <div id="se-lines">
+    <div class="se-line" id="se1"></div>
+    <div class="se-line" id="se2"></div>
+    <div class="se-line" id="se3"></div>
+    <div class="se-big" id="se-big">THE LAST SAVE</div>
+    <div class="se-final" id="se-final"></div>
+  </div>
+  <button id="se-restart" onclick="location.reload()">↺ العودة من البداية</button>
+</div>
 
 <!-- ══ INTRO ══ -->
 <div class="screen on" id="s-intro">
@@ -615,9 +751,13 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
     </div>
   </div>
 
+  <!-- sacrifice button -->
+  <button id="sacrifice-btn" onclick="showSacrificeOverlay()">⚡ تضحية</button>
+
   <!-- typing arena -->
   <div id="g-arena">
     <div id="g-timer"><div id="g-timer-fill"></div></div>
+    <div id="g-keyword"><span id="g-kw-label">MEMORY KEY —</span> <span id="g-kw-text"></span></div>
     <div id="g-code"></div>
     <div id="g-input-row">
       <span class="gi-prompt">&gt;_</span>
@@ -661,7 +801,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
       <div class="gal-grid" id="gal-grid"></div>
     </div>
     <button id="share-btn" onclick="shareResult()">↗ شارك نتيجتك</button>
-    <button class="end-continue-btn" onclick="startCinematic()">شاهد المشهد الأخير ↓</button>
+    <button class="end-continue-btn" onclick="showStats()">إحصائيات المعركة ↓</button>
   </div>
 
   <div id="end-cinematic">
@@ -998,17 +1138,17 @@ const MEMORIES=[
    desc:'خمس نجوم وكل مدينة خلفك. ركضت ساعة كاملة. في النهاية صعدت جبلاً وجلست تنظر للأسفل.',endMoment:'قمة الجبل'},
   {id:'er1b',ch:2,game:'ELDEN RING',cost:2,title:'اكتشاف Nokron تحت الأرض',
    desc:'سقطت في حفرة ظننتها نهايتك. وجدت مدينة كاملة تحت الأرض. نجوم تضيء السقف. شعرت أنك اكتشفت سراً.',endMoment:'النجوم تحت الأرض'},
-  {id:'er2',ch:3,game:'ELDEN RING',cost:3,title:'Malenia — الهزيمة الكاملة',
+  {id:'er2',ch:3,game:'ELDEN RING',cost:3,keyword:'MALENIA',title:'Malenia — الهزيمة الكاملة',
    desc:'مات شخصيتك 64 مرة. في كل مرة نفس الكمال المؤلم. أصبحت تحترمها وتكرهها وتفهمها في آنٍ واحد.',endMoment:'64 محاولة'},
-  {id:'gta2',ch:3,game:'GTA V',cost:2,title:'نهاية Trevor الفجائية',
+  {id:'gta2',ch:3,game:'GTA V',cost:2,keyword:'TREVOR',title:'نهاية Trevor الفجائية',
    desc:'لم تتوقعها. كانت بدون موسيقى وبدون وداع. شعرت أنك أنت من قرر. وأنك ربما أخطأت.',endMoment:'القرار الذي لا يُنسى'},
-  {id:'mc3',ch:3,game:'MINECRAFT',cost:1,title:'العالم الذي شاركته مع صديق',
+  {id:'mc3',ch:3,game:'MINECRAFT',cost:1,keyword:'SHARED',title:'العالم الذي شاركته مع صديق',
    desc:'لعبتما معاً صيف كامل. بنيتما مدينة. ثم انفصلتما. لا يزال الخادم موجوداً. لكن أحداً لا يدخله.',endMoment:'المدينة الفارغة'},
-  {id:'rdr3',ch:3,game:'RED DEAD 2',cost:3,title:'John Marston يبني مزرعته',
+  {id:'rdr3',ch:3,game:'RED DEAD 2',cost:3,keyword:'MARSTON',title:'John Marston يبني مزرعته',
    desc:'بعد كل شيء، أراد فقط أرضاً وأسرة. رأيته يدق المسامير ببطء. كان سعيداً. وأنت تعلم كيف ستنتهي.',endMoment:'المزرعة والأمل المكذوب'},
-  {id:'w33',ch:3,game:'THE WITCHER 3',cost:2,title:'وداع Geralt للمدينة الأخيرة',
+  {id:'w33',ch:3,game:'THE WITCHER 3',cost:2,keyword:'ROACH',title:'وداع Geralt للمدينة الأخيرة',
    desc:'ركب Roach وغادر. الموسيقى بدأت بهدوء. لم يلتفت. وأنت جلست تنظر للشاشة بعد انتهاء اللعبة.',endMoment:'الرحيل الأخير'},
-  {id:'gta3',ch:3,game:'GTA V',cost:1,title:'غروب Los Santos الأخير',
+  {id:'gta3',ch:3,game:'GTA V',cost:1,keyword:'SUNSET',title:'غروب Los Santos الأخير',
    desc:'وقفت على سطح ناطحة سحاب. الشمس تغرب خلف المدينة. لم يكن هناك مهمة. فقط اللحظة.',endMoment:'الغروب الذهبي'},
 
   /* GOD OF WAR */
@@ -1016,7 +1156,7 @@ const MEMORIES=[
    desc:'رميته وهو في الهواء ثم أشرت بيدك. عاد الفأس وحده. لم تكن تعرف ذلك ممكناً. أمسكته وحدقت فيه لثانية كاملة.',endMoment:'الفأس الذي يعود'},
   {id:'gow2',ch:2,game:'GOD OF WAR',cost:2,title:'Kratos يصارح Atreus بماضيه',
    desc:'لأول مرة تكلّم عن نفسه. لم يكن يريد. لكن Atreus سأل. كان الصمت أصعب من كل معركة خاضها.',endMoment:'أثقل اعتراف'},
-  {id:'gow3',ch:3,game:'GOD OF WAR',cost:2,title:'نثر الرماد في Jotunheim',
+  {id:'gow3',ch:3,game:'GOD OF WAR',cost:2,keyword:'FAYE',title:'نثر الرماد في Jotunheim',
    desc:'وصلا إلى أعلى قمة في العوالم التسعة. صمتا وأطلقا الرماد في الهواء. لم يكن هناك موسيقى ضخمة. فقط هما والريح.',endMoment:'أعلى نقطة في العوالم'},
 
   /* THE LAST OF US */
@@ -1024,7 +1164,7 @@ const MEMORIES=[
    desc:'كانت تحكي نكتة سخيفة في وسط نفق مظلم. كنت تريد أن تتجاهلها. لكنك ضحكت. كان ذلك بداية كل شيء.',endMoment:'الضحكة الأولى في الظلام'},
   {id:'lou2',ch:2,game:'THE LAST OF US',cost:3,title:'موت Sarah في الليلة الأولى',
    desc:'ثلاث دقائق من بداية اللعبة كافية لتكسير كل شيء. الطريقة التي سقطت. الطريقة التي نظر إليها Joel. لم تنسَ.',endMoment:'اللحظة التي غيّرت كل شيء'},
-  {id:'lou3',ch:3,game:'THE LAST OF US',cost:3,title:'كذبة Joel الأخيرة',
+  {id:'lou3',ch:3,game:'THE LAST OF US',cost:3,keyword:'ELLIE',title:'كذبة Joel الأخيرة',
    desc:'أنقذها ودمّر فرصة العالم في اللحظة ذاتها. لم تكن المسألة هل كان محقاً. كانت أنه لم يستطع أن يتركها تذهب.',endMoment:'الكذبة التي لا تُنسى'},
 
   /* PORTAL 2 */
@@ -1032,7 +1172,7 @@ const MEMORIES=[
    desc:'فتحتهما ونظرت إلى نفسك من الجهة الأخرى. لم يكن عقلك يفهم ما يرى. ثم فهمت. ثم أضحكتك.',endMoment:'رأيت نفسك من الجهة الأخرى'},
   {id:'p22',ch:2,game:'PORTAL 2',cost:2,title:'خيانة Wheatley في اللحظة الكبرى',
    desc:'ثقت به أكثر من أي أحد في اللعبة. ثم دفعك في الحفرة. المفاجأة لم تكن في الخيانة. كانت في مدى ثقتك.',endMoment:'ثمن الثقة'},
-  {id:'p23',ch:3,game:'PORTAL 2',cost:1,title:'GLaDOS تطلق سراحك في النهاية',
+  {id:'p23',ch:3,game:'PORTAL 2',cost:1,keyword:'APERTURE',title:'GLaDOS تطلق سراحك في النهاية',
    desc:'قضيت اللعبة وهي تهددك وتستهزئ. في الختام أطلقت سراحك بهدوء. ربما كانت تعلم شيئاً لم تفهمه أنت.',endMoment:'حرية من عدو قديم'}
 ];
 
@@ -1063,14 +1203,19 @@ const GAME_COLORS={
 // ═══════════════════════════════
 let G={
   chIdx:0,memQueue:[],curMem:null,
-  saved:[],lost:[],
+  saved:[],lost:[],sacrificed:[],
   identity:10,maxId:10,
   score:0,
   timerIv:null,timerLeft:0,
   code:'',typed:'',codeIdx:0,
   phase:'typing',
   waiting:false,
-  gameActive:false
+  gameActive:false,
+  totalKeys:0,correctKeys:0,
+  fastestCode:0,
+  timeouts:0,
+  drops:0,
+  sacrificeUsed:false
 };
 
 // ═══════════════════════════════
@@ -1112,6 +1257,145 @@ function ringBurst(x,y){
     document.getElementById('ptcl').appendChild(r);
     setTimeout(()=>r.remove(),900);
   }
+}
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+function gameColor(game,alpha=0.85){
+  const gc=GAME_COLORS[game];
+  if(!gc)return`rgba(201,168,76,${alpha})`;
+  const hex=gc.dot.replace('#','');
+  const r=parseInt(hex.substr(0,2),16),g=parseInt(hex.substr(2,2),16),b=parseInt(hex.substr(4,2),16);
+  return`rgba(${r},${g},${b},${alpha})`;
+}
+
+function spawnGhostCard(){
+  const card=document.getElementById('mem-card');
+  if(!card)return;
+  const rect=card.getBoundingClientRect();
+  const ghost=document.createElement('div');
+  ghost.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;
+    background:rgba(7,7,15,.55);border:1px solid rgba(255,255,255,.05);pointer-events:none;z-index:160;
+    opacity:.5;transition:transform 2.2s cubic-bezier(.25,.46,.45,.94),opacity 2s ease;
+    backdrop-filter:blur(6px);display:flex;align-items:flex-end;padding:14px;`;
+  const lbl=document.createElement('div');
+  lbl.style.cssText=`font-family:var(--mono);font-size:8px;letter-spacing:3px;color:rgba(255,255,255,.2);direction:ltr;`;
+  lbl.textContent=G.curMem?G.curMem.game:'';
+  ghost.appendChild(lbl);
+  document.body.appendChild(ghost);
+  requestAnimationFrame(()=>{
+    ghost.style.transform='translateY(-110px) scale(.88)';
+    ghost.style.opacity='0';
+  });
+  setTimeout(()=>ghost.remove(),2400);
+}
+
+function rebuildMobileKb(code){
+  const grid=document.getElementById('mk-typing');
+  const letters=[...new Set(code.split(''))].slice(0,8);
+  grid.innerHTML='';
+  letters.forEach(ch=>{
+    const btn=document.createElement('button');
+    btn.className='mk-btn';btn.dataset.key=ch;btn.textContent=ch;
+    btn.addEventListener('touchstart',e=>{e.preventDefault();if(G.phase==='typing'&&G.gameActive&&!G.waiting)handleKey(ch);},{passive:false});
+    btn.addEventListener('mousedown',e=>{e.preventDefault();if(G.phase==='typing'&&G.gameActive&&!G.waiting)handleKey(ch);});
+    grid.appendChild(btn);
+  });
+}
+
+// ═══════════════════════════════
+// SACRIFICE
+// ═══════════════════════════════
+function showSacrificeOverlay(){
+  if(G.sacrificeUsed||G.saved.length===0)return;
+  const list=document.getElementById('sac-list');
+  list.innerHTML='';
+  G.saved.forEach(mem=>{
+    const gc=GAME_COLORS[mem.game]||{dot:'#888'};
+    const item=document.createElement('div');
+    item.className='sac-item';
+    item.innerHTML=`<span>${mem.title}</span><span class="sac-item-game" style="color:${gc.dot}">${mem.game}</span>`;
+    item.onclick=()=>confirmSacrifice(mem.id);
+    list.appendChild(item);
+  });
+  document.getElementById('sac-overlay').classList.add('on');
+  G.waiting=true;
+}
+
+function closeSacrifice(){
+  document.getElementById('sac-overlay').classList.remove('on');
+  G.waiting=false;
+}
+
+function confirmSacrifice(memId){
+  const idx=G.saved.findIndex(m=>m.id===memId);
+  if(idx===-1)return;
+  const mem=G.saved.splice(idx,1)[0];
+  G.sacrificed.push(mem);
+  G.sacrificeUsed=true;
+  G.identity=Math.min(G.maxId,G.identity+3);
+  closeSacrifice();
+  updateIdentity();
+  updateHeader();
+  flash('rgba(192,57,43,.25)');
+  showWarn(`تضحية: ${mem.title} — +3 هوية`,2200);
+  SFX.save();
+  // Remove from saved sidebar
+  document.getElementById('gs-list').innerHTML='';
+  G.saved.forEach(m=>addSavedItem(m));
+}
+
+// ═══════════════════════════════
+// STATS SCREEN
+// ═══════════════════════════════
+function showStats(){
+  const acc=G.totalKeys>0?Math.round(G.correctKeys/G.totalKeys*100):100;
+  const gameCount={};
+  G.saved.forEach(m=>{gameCount[m.game]=(gameCount[m.game]||0)+1;});
+  const topGame=Object.entries(gameCount).sort((a,b)=>b[1]-a[1])[0];
+  const fastest=G.fastestCode>0?G.fastestCode.toFixed(1):'—';
+
+  const cells=[
+    {val:`${acc}%`,lbl:'دقة الكتابة'},
+    {val:G.fastestCode>0?`${fastest}s`,lbl:'أسرع إنجاز (وقت متبقي)'},
+    {val:topGame?`${topGame[1]} ذكريات\n${topGame[0]}`:'—',lbl:'اللعبة الأكثر إنقاذاً'},
+    {val:`${G.timeouts} / ${G.drops}`,lbl:'انتهى الوقت / اخترت الإسقاط'},
+  ];
+
+  const grid=document.getElementById('st-grid');
+  grid.innerHTML='';
+  cells.forEach(c=>{
+    const cell=document.createElement('div');cell.className='st-cell';
+    cell.innerHTML=`<div class="st-val">${c.val.replace('\n','<br>')}</div><div class="st-lbl">${c.lbl}</div>`;
+    grid.appendChild(cell);
+  });
+  document.getElementById('stats-screen').classList.add('on');
+}
+
+// ═══════════════════════════════
+// SECRET ENDING
+// ═══════════════════════════════
+function showSecretEnding(){
+  if(_soundOn)stopMusic(1500);
+  const el=document.getElementById('secret-end');
+  el.classList.add('on');
+  const savedGames=[...new Set(G.saved.map(m=>m.game))];
+  const line1=`النظام لا يصدق ما يرى.`;
+  const line2=`${G.saved.length} ذكرى — كلها ما زالت هنا.`;
+  const line3=`لم يتوقع أحد هذا.`;
+  const sub='YOU ARE THE EXCEPTION';
+  const delays=[1500,4000,6500,9500,11000,14000];
+  const items=[
+    ()=>{ document.getElementById('se1').textContent=line1; document.getElementById('se1').classList.add('vis'); },
+    ()=>{ document.getElementById('se2').textContent=line2; document.getElementById('se2').classList.add('vis'); },
+    ()=>{ document.getElementById('se3').textContent=line3; document.getElementById('se3').classList.add('vis'); },
+    ()=>{ document.getElementById('se-big').classList.add('vis'); },
+    ()=>{ document.getElementById('se-final').textContent=sub; document.getElementById('se-final').classList.add('vis'); },
+    ()=>{ document.getElementById('se-restart').classList.add('vis'); }
+  ];
+  items.forEach((fn,i)=>setTimeout(fn,delays[i]));
+  if(_soundOn)setTimeout(()=>playMusic('end',0.4,3000),2000);
 }
 
 // ═══════════════════════════════
@@ -1242,6 +1526,8 @@ function updateIdentity(){
   const lv=G.identity<=3?3:G.identity<=5?2:G.identity<=7?1:0;
   setChaos(lv);
   if(G.identity<=3&&G.gameActive)setInterval(()=>{if(G.identity<=3)SFX.beat();},2500);
+  const sacBtn=document.getElementById('sacrifice-btn');
+  if(sacBtn)sacBtn.style.display=(G.identity<=3&&G.saved.length>0&&!G.sacrificeUsed&&G.gameActive)?'block':'none';
 }
 
 // ═══════════════════════════════
@@ -1303,35 +1589,41 @@ function showMemCard(mem){
 // ═══════════════════════════════
 const POOL='ASDFJKLM';
 function generateCode(len){
-  G.code=Array.from({length:len},()=>POOL[Math.floor(Math.random()*POOL.length)]).join('');
+  const kwEl=document.getElementById('g-keyword');
+  if(G.chIdx===2 && G.curMem && G.curMem.keyword){
+    G.code=G.curMem.keyword;
+    if(kwEl){kwEl.style.display='block';document.getElementById('g-kw-text').textContent=G.curMem.keyword;}
+  } else {
+    G.code=Array.from({length:len},()=>POOL[Math.floor(Math.random()*POOL.length)]).join('');
+    if(kwEl)kwEl.style.display='none';
+  }
   G.typed='';G.codeIdx=0;G.phase='typing';
   renderCode();
   document.getElementById('g-typed').textContent='';
   document.getElementById('g-arena').style.display='flex';
   document.getElementById('g-choice').classList.remove('show');
   document.getElementById('g-timer-fill').classList.remove('low');
+  rebuildMobileKb(G.code);
   syncMobileKb();
 }
 
 function renderCode(){
   const c=document.getElementById('g-code');c.innerHTML='';
-  const POOL_CHARS='ASDFJKLM';
+  const GLITCH='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   [...G.code].forEach((ch,i)=>{
     const d=document.createElement('div');d.className='code-char';d.id=`cc-${i}`;
     if(i<G.codeIdx)d.classList.add('done');
     else if(i===G.codeIdx)d.classList.add('cur');
     d.textContent='?';
     c.appendChild(d);
-    // Staggered decrypt reveal
-    const delay=i*70;
     setTimeout(()=>{
       d.classList.add('visible');
       let g=0;
       const giv=setInterval(()=>{
-        if(g<3){d.textContent=POOL_CHARS[Math.floor(Math.random()*POOL_CHARS.length)];g++;}
+        if(g<3){d.textContent=GLITCH[Math.floor(Math.random()*GLITCH.length)];g++;}
         else{d.textContent=ch;clearInterval(giv);}
       },55);
-    },delay);
+    },i*70);
   });
 }
 
@@ -1362,6 +1654,7 @@ function updateTimerBar(){
 
 function timedOut(){
   G.phase='choice';
+  G.timeouts++;
   memLost(true);
 }
 
@@ -1390,13 +1683,15 @@ window.addEventListener('keydown',e=>{
 
 function handleKey(k){
   const expected=G.code[G.codeIdx];
+  G.totalKeys++;
   if(k===expected){
+    G.correctKeys++;
     SFX.key();
     const ch=document.getElementById(`cc-${G.codeIdx}`);
     if(ch){
       ch.className='code-char done';
       const r=ch.getBoundingClientRect();
-      burst(r.left+r.width/2,r.top+r.height/2,'rgba(201,168,76,.8)',6);
+      burst(r.left+r.width/2,r.top+r.height/2, gameColor(G.curMem.game,0.8), 6);
     }
     G.typed+=k;
     document.getElementById('g-typed').textContent=G.typed;
@@ -1418,9 +1713,10 @@ function codeComplete(){
   clearInterval(G.timerIv);
   G.phase='choice';
   G.score+=100+Math.floor(G.timerLeft*10);
+  if(G.timerLeft>G.fastestCode)G.fastestCode=G.timerLeft;
   flash('rgba(201,168,76,.15)');
-  // Big celebration burst
-  burst(window.innerWidth/2,window.innerHeight/2,'rgba(201,168,76,.85)',28,true);
+  const col=G.curMem?gameColor(G.curMem.game,0.88):'rgba(201,168,76,.88)';
+  burst(window.innerWidth/2,window.innerHeight/2,col,28,true);
   ringBurst(window.innerWidth/2,window.innerHeight/2);
   document.getElementById('g-arena').style.display='none';
   document.getElementById('g-choice').classList.add('show');
@@ -1454,7 +1750,9 @@ function choose(save){
       memLost(false);
     }
   } else {
+    G.drops++;
     SFX.drop();
+    spawnGhostCard();
     const overlay=document.getElementById('release-overlay');
     const word=document.getElementById('ro-word');
     const phrases=['تذهب..','للأبد..','وداعاً..'];
@@ -1602,6 +1900,12 @@ function endGame(){
     G._clfinal='الذاكرة التي تحارب من أجلها تستحق أن تُحكى.';
   }
 
+  // Secret ending: saved 20+ with identity intact
+  if(G.saved.length>=20&&G.identity>0){
+    showSecretEnding();
+    return;
+  }
+
   buildGallery();
   go('s-end');
   setTimeout(()=>{
@@ -1663,11 +1967,13 @@ function buildCinSlideshow(){
   const container=document.getElementById('cin-slideshow');
   container.innerHTML='';
   const COLORS={
-    'MINECRAFT':'#051405','GTA V':'#090518',
-    'THE WITCHER 3':'#050e05','RED DEAD 2':'#100302','ELDEN RING':'#0d0800'
+    'MINECRAFT':'#051405','GTA V':'#090518','THE WITCHER 3':'#050e05',
+    'RED DEAD 2':'#100302','ELDEN RING':'#0d0800','GOD OF WAR':'#12020a',
+    'THE LAST OF US':'#0f0e00','PORTAL 2':'#0e0a04'
   };
   const LABELS={
-    'MINECRAFT':'MC','GTA V':'GTA','THE WITCHER 3':'W3','RED DEAD 2':'RDR','ELDEN RING':'ER'
+    'MINECRAFT':'MC','GTA V':'GTA','THE WITCHER 3':'W3','RED DEAD 2':'RDR',
+    'ELDEN RING':'ER','GOD OF WAR':'GoW','THE LAST OF US':'TLOU','PORTAL 2':'P2'
   };
   const slots=MEMORIES.slice(0,6);
   slots.forEach((mem,i)=>{
@@ -1700,19 +2006,28 @@ function buildGallery(){
   grid.innerHTML='';
   MEMORIES.forEach(mem=>{
     const sv=G.saved.find(s=>s.id===mem.id);
+    const sacrificed=G.sacrificed.find(s=>s.id===mem.id);
     const gc=GAME_COLORS[mem.game]||{gal:'var(--void)',dot:'#888',accent:'rgba(255,255,255,.3)'};
     const el=document.createElement('div');
-    el.className='gal-item'+(sv?' saved-item':' lost');
-    const dotColor=sv?gc.dot:'rgba(192,57,43,.4)';
-    el.innerHTML=`
-      <div class="gal-bg" style="background:${gc.gal}"></div>
-      <div class="gal-over"></div>
-      <div class="gal-info">
-        <div class="gal-game" style="color:${sv?gc.dot:'rgba(192,57,43,.5)'}">${mem.game}</div>
-        <div class="gal-moment">${sv?mem.title:'???'}</div>
-      </div>`;
-    if(sv){
-      el.style.boxShadow=`inset 0 0 0 1px ${gc.accent}`;
+    if(sacrificed){
+      el.className='gal-item lost';
+      el.innerHTML=`
+        <div class="gal-bg" style="background:${gc.gal};filter:saturate(.15) brightness(.25)"></div>
+        <div class="gal-over"></div>
+        <div class="gal-info">
+          <div class="gal-game" style="color:rgba(192,57,43,.4)">${mem.game}</div>
+          <div class="gal-moment" style="color:rgba(192,57,43,.5);font-size:10px;letter-spacing:2px;font-family:var(--mono)">مُهداة</div>
+        </div>`;
+    } else {
+      el.className='gal-item'+(sv?' saved-item':' lost');
+      el.innerHTML=`
+        <div class="gal-bg" style="background:${gc.gal}"></div>
+        <div class="gal-over"></div>
+        <div class="gal-info">
+          <div class="gal-game" style="color:${sv?gc.dot:'rgba(192,57,43,.5)'}">${mem.game}</div>
+          <div class="gal-moment">${sv?mem.title:'???'}</div>
+        </div>`;
+      if(sv)el.style.boxShadow=`inset 0 0 0 1px ${gc.accent}`;
     }
     grid.appendChild(el);
   });
