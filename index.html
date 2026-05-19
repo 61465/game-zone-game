@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>THE LAST SAVE — تجربة ذاكرة</title>
 <meta name="description" content="لعبة تفاعلية عن ذكريات الألعاب وهويتك الرقمية">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#03030a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="THE LAST SAVE">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Cinzel:wght@700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;}
@@ -152,6 +157,15 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 .mc-game[data-game="THE WITCHER 3"]{color:#A5D6A7;}
 .mc-game[data-game="RED DEAD 2"]{color:#FF8A65;}
 .mc-game[data-game="ELDEN RING"]{color:#FFD700;}
+.mem-card[data-game="GOD OF WAR"]{border-color:rgba(196,30,58,.2);box-shadow:inset 0 0 40px rgba(196,30,58,.04);}
+.mem-card[data-game="THE LAST OF US"]{border-color:rgba(255,193,7,.2);box-shadow:inset 0 0 40px rgba(255,193,7,.04);}
+.mem-card[data-game="PORTAL 2"]{border-color:rgba(255,152,0,.2);box-shadow:inset 0 0 40px rgba(255,152,0,.04);}
+.mc-bar[data-game="GOD OF WAR"]{background:linear-gradient(90deg,transparent,#c41e3a,transparent);}
+.mc-bar[data-game="THE LAST OF US"]{background:linear-gradient(90deg,transparent,#FFC107,transparent);}
+.mc-bar[data-game="PORTAL 2"]{background:linear-gradient(90deg,transparent,#FF9800,transparent);}
+.mc-game[data-game="GOD OF WAR"]{color:#ef5350;}
+.mc-game[data-game="THE LAST OF US"]{color:#FFD54F;}
+.mc-game[data-game="PORTAL 2"]{color:#FFB74D;}
 
 .mc-title{font-size:clamp(17px,2.8vw,24px);font-weight:700;line-height:1.6;color:var(--white);margin-bottom:12px;letter-spacing:0;}
 .mc-desc{font-size:clamp(12px,1.6vw,14px);color:rgba(255,255,255,.38);line-height:1.9;font-weight:300;letter-spacing:0;}
@@ -894,7 +908,31 @@ const MEMORIES=[
   {id:'w33',ch:3,game:'THE WITCHER 3',cost:2,title:'وداع Geralt للمدينة الأخيرة',
    desc:'ركب Roach وغادر. الموسيقى بدأت بهدوء. لم يلتفت. وأنت جلست تنظر للشاشة بعد انتهاء اللعبة.',endMoment:'الرحيل الأخير'},
   {id:'gta3',ch:3,game:'GTA V',cost:1,title:'غروب Los Santos الأخير',
-   desc:'وقفت على سطح ناطحة سحاب. الشمس تغرب خلف المدينة. لم يكن هناك مهمة. فقط اللحظة.',endMoment:'الغروب الذهبي'}
+   desc:'وقفت على سطح ناطحة سحاب. الشمس تغرب خلف المدينة. لم يكن هناك مهمة. فقط اللحظة.',endMoment:'الغروب الذهبي'},
+
+  /* GOD OF WAR */
+  {id:'gow1',ch:1,game:'GOD OF WAR',cost:1,title:'أول استدعاء للفأس',
+   desc:'رميته وهو في الهواء ثم أشرت بيدك. عاد الفأس وحده. لم تكن تعرف ذلك ممكناً. أمسكته وحدقت فيه لثانية كاملة.',endMoment:'الفأس الذي يعود'},
+  {id:'gow2',ch:2,game:'GOD OF WAR',cost:2,title:'Kratos يصارح Atreus بماضيه',
+   desc:'لأول مرة تكلّم عن نفسه. لم يكن يريد. لكن Atreus سأل. كان الصمت أصعب من كل معركة خاضها.',endMoment:'أثقل اعتراف'},
+  {id:'gow3',ch:3,game:'GOD OF WAR',cost:2,title:'نثر الرماد في Jotunheim',
+   desc:'وصلا إلى أعلى قمة في العوالم التسعة. صمتا وأطلقا الرماد في الهواء. لم يكن هناك موسيقى ضخمة. فقط هما والريح.',endMoment:'أعلى نقطة في العوالم'},
+
+  /* THE LAST OF US */
+  {id:'lou1',ch:1,game:'THE LAST OF US',cost:1,title:'أول لقاء مع Ellie',
+   desc:'كانت تحكي نكتة سخيفة في وسط نفق مظلم. كنت تريد أن تتجاهلها. لكنك ضحكت. كان ذلك بداية كل شيء.',endMoment:'الضحكة الأولى في الظلام'},
+  {id:'lou2',ch:2,game:'THE LAST OF US',cost:3,title:'موت Sarah في الليلة الأولى',
+   desc:'ثلاث دقائق من بداية اللعبة كافية لتكسير كل شيء. الطريقة التي سقطت. الطريقة التي نظر إليها Joel. لم تنسَ.',endMoment:'اللحظة التي غيّرت كل شيء'},
+  {id:'lou3',ch:3,game:'THE LAST OF US',cost:3,title:'كذبة Joel الأخيرة',
+   desc:'أنقذها ودمّر فرصة العالم في اللحظة ذاتها. لم تكن المسألة هل كان محقاً. كانت أنه لم يستطع أن يتركها تذهب.',endMoment:'الكذبة التي لا تُنسى'},
+
+  /* PORTAL 2 */
+  {id:'p21',ch:1,game:'PORTAL 2',cost:1,title:'أول بوابتين في نفس اللحظة',
+   desc:'فتحتهما ونظرت إلى نفسك من الجهة الأخرى. لم يكن عقلك يفهم ما يرى. ثم فهمت. ثم أضحكتك.',endMoment:'رأيت نفسك من الجهة الأخرى'},
+  {id:'p22',ch:2,game:'PORTAL 2',cost:2,title:'خيانة Wheatley في اللحظة الكبرى',
+   desc:'ثقت به أكثر من أي أحد في اللعبة. ثم دفعك في الحفرة. المفاجأة لم تكن في الخيانة. كانت في مدى ثقتك.',endMoment:'ثمن الثقة'},
+  {id:'p23',ch:3,game:'PORTAL 2',cost:1,title:'GLaDOS تطلق سراحك في النهاية',
+   desc:'قضيت اللعبة وهي تهددك وتستهزئ. في الختام أطلقت سراحك بهدوء. ربما كانت تعلم شيئاً لم تفهمه أنت.',endMoment:'حرية من عدو قديم'}
 ];
 
 const LOSS_MSG={
@@ -902,15 +940,21 @@ const LOSS_MSG={
   'GTA V':'حرية Los Santos وسماؤها الواسعة.. محذوفة.',
   'THE WITCHER 3':'قصة Geralt وكل قراراتك وعلاقاتك.. محذوفة.',
   'RED DEAD 2':'Arthur وJohn وكل ما علّماك إياه.. محذوف.',
-  'ELDEN RING':'كل انتصاراتك المكلوبة وصبرك الطويل.. محذوفة.'
+  'ELDEN RING':'كل انتصاراتك المكلوبة وصبرك الطويل.. محذوفة.',
+  'GOD OF WAR':'قصة Kratos وAtreus ورحلتهما عبر العوالم التسعة.. محذوفة.',
+  'THE LAST OF US':'رحلة Joel وEllie وكل ما ضحّيا به من أجل بعضهما.. محذوفة.',
+  'PORTAL 2':'ألغاز Aperture Science وصراعك مع GLaDOS الطويل.. محذوف.'
 };
 
 const GAME_COLORS={
-  'MINECRAFT': {gal:'linear-gradient(135deg,#0e2010,#051505)',dot:'#4CAF50',accent:'rgba(76,175,80,.4)'},
-  'GTA V':     {gal:'linear-gradient(135deg,#180a22,#0d0018)',dot:'#CE93D8',accent:'rgba(156,39,176,.4)'},
-  'THE WITCHER 3':{gal:'linear-gradient(135deg,#0d1a0a,#121008)',dot:'#A5D6A7',accent:'rgba(139,195,74,.4)'},
-  'RED DEAD 2':{gal:'linear-gradient(135deg,#200a06,#150404)',dot:'#FF8A65',accent:'rgba(255,87,34,.4)'},
-  'ELDEN RING':{gal:'linear-gradient(135deg,#1a1204,#100808)',dot:'#FFD700',accent:'rgba(255,215,0,.45)'}
+  'MINECRAFT':     {gal:'linear-gradient(135deg,#0e2010,#051505)',dot:'#4CAF50',accent:'rgba(76,175,80,.4)'},
+  'GTA V':         {gal:'linear-gradient(135deg,#180a22,#0d0018)',dot:'#CE93D8',accent:'rgba(156,39,176,.4)'},
+  'THE WITCHER 3': {gal:'linear-gradient(135deg,#0d1a0a,#121008)',dot:'#A5D6A7',accent:'rgba(139,195,74,.4)'},
+  'RED DEAD 2':    {gal:'linear-gradient(135deg,#200a06,#150404)',dot:'#FF8A65',accent:'rgba(255,87,34,.4)'},
+  'ELDEN RING':    {gal:'linear-gradient(135deg,#1a1204,#100808)',dot:'#FFD700',accent:'rgba(255,215,0,.45)'},
+  'GOD OF WAR':    {gal:'linear-gradient(135deg,#1a0205,#0e0508)',dot:'#ef5350',accent:'rgba(196,30,58,.4)'},
+  'THE LAST OF US':{gal:'linear-gradient(135deg,#1a1400,#0f0e00)',dot:'#FFD54F',accent:'rgba(255,193,7,.4)'},
+  'PORTAL 2':      {gal:'linear-gradient(135deg,#1a0c00,#0e0a04)',dot:'#FFB74D',accent:'rgba(255,152,0,.4)'}
 };
 
 // ═══════════════════════════════
@@ -1526,5 +1570,6 @@ function buildGallery(){
   });
 }
 </script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>
