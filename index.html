@@ -497,10 +497,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 .cin-spot-moment{
   font-family:var(--mono);font-size:9px;letter-spacing:3px;
   direction:ltr;text-align:left;
-  position:absolute;bottom:18px;left:20px;color:rgba(255,255,255,.2);
+  position:absolute;bottom:34px;left:20px;color:rgba(255,255,255,.2);
 }
 .cin-spot-dots{
-  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
   display:flex;gap:5px;align-items:center;
 }
 .cin-spot-dot{
@@ -716,13 +716,51 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 #se-restart.vis{opacity:1;}
 #se-restart:hover{color:rgba(255,255,255,.4);}
 
-/* Mobile responsive tweaks */
+/* ══════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════ */
 @media(max-width:600px){
+  /* Game screen */
   .mem-card{padding:24px 22px 20px;}
   #g-saved{display:none;}
   #g-identity{right:8px;top:70px;width:120px;}
   .gh-score{font-size:16px;}
   .ch-btn{padding:12px 24px;font-size:13px;}
+
+  /* Chapter intro: hide decorative art so text isn't covered */
+  .ci-art{display:none;}
+  .ci-wrap{padding-right:0;}
+
+  /* Stats: single column */
+  .st-grid{grid-template-columns:1fr;}
+  .st-val{font-size:24px;}
+
+  /* Deletion phase */
+  .cdl-warn{letter-spacing:3px;font-size:10px;}
+  .cdl-card{font-size:9px;letter-spacing:2px;padding:7px 12px;}
+  .cdl-progress{width:75vw;}
+
+  /* Spotlight: tighter layout for portrait phones */
+  #cin-spotlight{width:88vw;}
+  .cin-spot-game{top:18px;left:16px;font-size:9px;}
+  .cin-spot-title{top:44px;left:14px;right:14px;font-size:16px;}
+  .cin-spot-desc{top:100px;left:14px;right:14px;font-size:11px;line-height:1.85;}
+  .cin-spot-moment{bottom:32px;left:14px;font-size:8px;}
+  .cin-spot-dots{bottom:11px;}
+
+  /* Gallery dialogue */
+  .gtl{font-size:13px;line-height:1.9;}
+  .gtl-f{font-size:13px;}
+
+  /* Gallery frames: slightly smaller */
+  .gal-frame{width:62px;}
+}
+
+/* Very small phones (≤ 380px) */
+@media(max-width:380px){
+  .cin-spot-title{font-size:15px;}
+  .cin-spot-desc{font-size:10px;top:94px;}
+  .st-grid{gap:10px;}
 }
 </style>
 </head>
