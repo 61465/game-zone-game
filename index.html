@@ -462,6 +462,48 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
 }
 .gal-frame.saved .gal-frame-label{color:rgba(255,255,255,.65);}
 
+/* Spotlight: large memory frame shown one at a time */
+#cin-spotlight{
+  position:absolute;top:12vh;left:50%;transform:translateX(-50%);
+  width:min(420px,78vw);height:50%;z-index:15;
+  display:flex;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.cin-spot-inner{
+  width:100%;height:100%;
+  border:1px solid rgba(255,255,255,.1);
+  background:rgba(5,5,15,.9);
+  position:relative;overflow:hidden;
+  opacity:0;transform:scale(.97) translateY(10px);
+  transition:opacity .55s ease,transform .55s ease;
+}
+.cin-spot-inner.show{opacity:1;transform:none;}
+.cin-spot-bg{position:absolute;inset:0;opacity:.4;}
+.cin-spot-bar{position:absolute;top:0;left:0;right:0;height:2px;opacity:.7;}
+.cin-spot-game{
+  font-family:var(--mono);font-size:10px;letter-spacing:4px;
+  position:absolute;top:22px;left:22px;direction:ltr;font-weight:700;
+}
+.cin-spot-title{
+  font-family:var(--arabic);font-size:clamp(17px,2.5vw,23px);font-weight:700;
+  line-height:1.6;letter-spacing:0;direction:rtl;text-align:right;
+  position:absolute;top:54px;left:20px;right:20px;color:rgba(255,255,255,.88);
+}
+.cin-spot-desc{
+  font-family:var(--arabic);font-size:clamp(11px,1.5vw,13px);font-weight:300;
+  line-height:1.95;letter-spacing:0;direction:rtl;text-align:right;
+  position:absolute;top:108px;left:20px;right:20px;color:rgba(255,255,255,.42);
+}
+.cin-spot-moment{
+  font-family:var(--mono);font-size:9px;letter-spacing:3px;
+  direction:ltr;text-align:left;
+  position:absolute;bottom:18px;left:20px;color:rgba(255,255,255,.2);
+}
+.cin-spot-counter{
+  font-family:var(--mono);font-size:8px;letter-spacing:2px;
+  position:absolute;bottom:18px;right:20px;color:rgba(255,255,255,.15);direction:ltr;
+}
+
 #gal-floor{position:absolute;bottom:12vh;left:0;right:0;height:28%;
   background:linear-gradient(to bottom,rgba(4,3,10,.95),rgba(2,2,8,1));}
 #gal-floor-ref{position:absolute;bottom:0;left:0;right:0;height:1px;
@@ -907,6 +949,17 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
       <!-- wall + frames -->
       <div id="gal-wall">
         <div id="gal-frames-wrap"><div id="gal-frames"></div></div>
+      </div>
+      <!-- Spotlight: one memory at a time -->
+      <div id="cin-spotlight">
+        <div class="cin-spot-inner">
+          <div class="cin-spot-bg"></div>
+          <div class="cin-spot-bar"></div>
+          <div class="cin-spot-game"></div>
+          <div class="cin-spot-title"></div>
+          <div class="cin-spot-desc"></div>
+          <div class="cin-spot-moment"></div>
+        </div>
       </div>
       <!-- floor -->
       <div id="gal-floor"><div id="gal-floor-ref"></div></div>
@@ -2143,24 +2196,56 @@ function runGalleryPhase(){
   requestAnimationFrame(()=>requestAnimationFrame(()=>{gal.style.transition='opacity 1.5s ease';gal.style.opacity='1';}));
 
   buildGalleryFrames();
+  setTimeout(()=>document.getElementById('gal-player').classList.add('show'),700);
 
-  setTimeout(()=>{
+  const savedMems=G.saved;
+  const perMem=savedMems.length<=4?5200:savedMems.length<=8?4000:3000;
+
+  const afterSpotlight=()=>{
     document.querySelectorAll('.gal-frame').forEach((fr,i)=>{
-      setTimeout(()=>fr.classList.add('show'),i*75);
+      setTimeout(()=>fr.classList.add('show'),i*55);
     });
-  },400);
+    const delays=[1400,3600,5800,9200];
+    const texts=[G._cl1,G._cl2,G._cl3,G._clfinal];
+    ['gtl1','gtl2','gtl3','gtl-f'].forEach((id,i)=>{
+      const el=document.getElementById(id);
+      if(el&&texts[i]){el.innerHTML=texts[i];setTimeout(()=>el.classList.add('vis'),delays[i]);}
+    });
+    setTimeout(()=>document.getElementById('cin-restart').classList.add('vis'),13000);
+  };
 
-  setTimeout(()=>document.getElementById('gal-player').classList.add('show'),1800);
+  setTimeout(()=>cycleSpotlight(savedMems,perMem,afterSpotlight),1000);
+}
 
-  const delays=[3200,5800,8400,12000];
-  const ids=['gtl1','gtl2','gtl3','gtl-f'];
-  const texts=[G._cl1,G._cl2,G._cl3,G._clfinal];
-  ids.forEach((id,i)=>{
-    const el=document.getElementById(id);
-    if(el&&texts[i]){el.innerHTML=texts[i];setTimeout(()=>el.classList.add('vis'),delays[i]);}
-  });
+function cycleSpotlight(mems,dur,cb){
+  if(!mems.length){cb();return;}
+  const spot=document.getElementById('cin-spotlight');
+  const inner=spot.querySelector('.cin-spot-inner');
+  const counter=spot.querySelector('.cin-spot-counter');
+  let idx=0;
 
-  setTimeout(()=>document.getElementById('cin-restart').classList.add('vis'),17000);
+  function showNext(){
+    if(idx>=mems.length){
+      inner.classList.remove('show');
+      setTimeout(()=>{spot.style.visibility='hidden';cb();},700);
+      return;
+    }
+    const mem=mems[idx];
+    const gc=GAME_COLORS[mem.game]||{gal:'#050510',dot:'#c9a84c'};
+    spot.querySelector('.cin-spot-bar').style.background=
+      `linear-gradient(90deg,transparent,${gc.dot},transparent)`;
+    spot.querySelector('.cin-spot-bg').style.background=gc.gal;
+    spot.querySelector('.cin-spot-game').style.color=gc.dot;
+    spot.querySelector('.cin-spot-game').textContent=mem.game;
+    spot.querySelector('.cin-spot-title').textContent=mem.title;
+    spot.querySelector('.cin-spot-desc').textContent=mem.desc;
+    spot.querySelector('.cin-spot-moment').textContent='— '+(mem.endMoment||'');
+    if(counter)counter.textContent=(idx+1)+' / '+mems.length;
+    inner.classList.add('show');
+    idx++;
+    setTimeout(()=>{inner.classList.remove('show');setTimeout(showNext,600);},dur-600);
+  }
+  showNext();
 }
 
 function buildGalleryFrames(){
