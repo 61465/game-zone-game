@@ -499,9 +499,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
   direction:ltr;text-align:left;
   position:absolute;bottom:18px;left:20px;color:rgba(255,255,255,.2);
 }
-.cin-spot-counter{
-  font-family:var(--mono);font-size:8px;letter-spacing:2px;
-  position:absolute;bottom:18px;right:20px;color:rgba(255,255,255,.15);direction:ltr;
+.cin-spot-dots{
+  position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;align-items:center;
+}
+.cin-spot-dot{
+  width:5px;height:5px;border-radius:50%;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);
+  transition:background .4s ease,transform .4s ease,box-shadow .4s ease;
+  flex-shrink:0;
+}
+.cin-spot-dot.active{
+  background:var(--gold);border-color:var(--gold2);
+  transform:scale(1.5);box-shadow:0 0 8px rgba(201,168,76,.55);
+}
+.cin-spot-dot.done{
+  background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.25);
 }
 
 #gal-floor{position:absolute;bottom:12vh;left:0;right:0;height:28%;
@@ -959,6 +972,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9000;
           <div class="cin-spot-title"></div>
           <div class="cin-spot-desc"></div>
           <div class="cin-spot-moment"></div>
+          <div class="cin-spot-dots"></div>
         </div>
       </div>
       <!-- floor -->
@@ -2199,19 +2213,25 @@ function runGalleryPhase(){
   setTimeout(()=>document.getElementById('gal-player').classList.add('show'),700);
 
   const savedMems=G.saved;
-  const perMem=savedMems.length<=4?5200:savedMems.length<=8?4000:3000;
+  // مدة أطول: حتى أسرع حالة 3.5 ثانية لضمان القراءة
+  const perMem=savedMems.length<=4?5500:savedMems.length<=8?4800:savedMems.length<=14?4000:3500;
 
   const afterSpotlight=()=>{
-    document.querySelectorAll('.gal-frame').forEach((fr,i)=>{
-      setTimeout(()=>fr.classList.add('show'),i*55);
-    });
-    const delays=[1400,3600,5800,9200];
+    // أولاً: الإطارات الصغيرة تظهر على الجدار
+    const frames=document.querySelectorAll('.gal-frame');
+    frames.forEach((fr,i)=>setTimeout(()=>fr.classList.add('show'),i*55));
+    // ثانياً: الحوار يبدأ بعد انتهاء ظهور الإطارات + توقف قصير
+    const framesDelay=frames.length*55+1800;
+    const textDelays=[0,2200,4400,7600];
     const texts=[G._cl1,G._cl2,G._cl3,G._clfinal];
     ['gtl1','gtl2','gtl3','gtl-f'].forEach((id,i)=>{
       const el=document.getElementById(id);
-      if(el&&texts[i]){el.innerHTML=texts[i];setTimeout(()=>el.classList.add('vis'),delays[i]);}
+      if(el&&texts[i]){
+        el.innerHTML=texts[i];
+        setTimeout(()=>el.classList.add('vis'),framesDelay+textDelays[i]);
+      }
     });
-    setTimeout(()=>document.getElementById('cin-restart').classList.add('vis'),13000);
+    setTimeout(()=>document.getElementById('cin-restart').classList.add('vis'),framesDelay+10000);
   };
 
   setTimeout(()=>cycleSpotlight(savedMems,perMem,afterSpotlight),1000);
@@ -2221,13 +2241,22 @@ function cycleSpotlight(mems,dur,cb){
   if(!mems.length){cb();return;}
   const spot=document.getElementById('cin-spotlight');
   const inner=spot.querySelector('.cin-spot-inner');
-  const counter=spot.querySelector('.cin-spot-counter');
-  let idx=0;
+  const dotsWrap=spot.querySelector('.cin-spot-dots');
 
+  // بناء النقاط
+  dotsWrap.innerHTML='';
+  const dots=mems.map(()=>{
+    const d=document.createElement('div');
+    d.className='cin-spot-dot';
+    dotsWrap.appendChild(d);
+    return d;
+  });
+
+  let idx=0;
   function showNext(){
     if(idx>=mems.length){
       inner.classList.remove('show');
-      setTimeout(()=>{spot.style.visibility='hidden';cb();},700);
+      setTimeout(()=>{spot.style.visibility='hidden';cb();},750);
       return;
     }
     const mem=mems[idx];
@@ -2240,7 +2269,10 @@ function cycleSpotlight(mems,dur,cb){
     spot.querySelector('.cin-spot-title').textContent=mem.title;
     spot.querySelector('.cin-spot-desc').textContent=mem.desc;
     spot.querySelector('.cin-spot-moment').textContent='— '+(mem.endMoment||'');
-    if(counter)counter.textContent=(idx+1)+' / '+mems.length;
+    // تحديث النقاط
+    dots.forEach((d,i)=>{
+      d.className='cin-spot-dot'+(i===idx?' active':i<idx?' done':'');
+    });
     inner.classList.add('show');
     idx++;
     setTimeout(()=>{inner.classList.remove('show');setTimeout(showNext,600);},dur-600);
